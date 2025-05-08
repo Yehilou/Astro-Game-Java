@@ -1,9 +1,5 @@
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
 
 public class WindowGame extends JFrame {
     private int speed;
@@ -15,10 +11,15 @@ public class WindowGame extends JFrame {
     private JLabel countdownLabel;
     private boolean gameStarted = false;
 
+    private Music music;
+
+    private JPanel gamePanel; // Déclare un attribut pour gamePanel
+
     public WindowGame(int speed, int timerDuration) {
         this.speed = speed;
         this.timerDuration = timerDuration;
         this.timeRemaining = timerDuration;
+        this.music = new Music(); // MODIFICATION
 
         setTitle("Space Game");
         setSize(800, 600);
@@ -41,7 +42,6 @@ public class WindowGame extends JFrame {
         countdownLabel.setBounds(0, 200, 800, 100);
         add(countdownLabel);
 
-
         JButton backButton = new JButton("<< Menu");
         backButton.setFont(new Font("Arial", Font.BOLD, 14));
         backButton.setBounds(680, 10, 100, 30);
@@ -51,12 +51,13 @@ public class WindowGame extends JFrame {
         backButton.setFocusPainted(false);
         backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         backButton.addActionListener(e -> {
+            music.stop(); // MODIFICATION : on coupe la musique en revenant au menu
             dispose();
             new MenuPrincipal().setVisible(true);
         });
         add(backButton);
 
-        JPanel gamePanel = new JPanel() {
+        gamePanel = new JPanel() {  // Initialise gamePanel ici
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 drawScrollingBackground(g);
@@ -69,7 +70,7 @@ public class WindowGame extends JFrame {
         setVisible(true);
 
         startBackgroundScroll(gamePanel);
-        startIntroCountdown();  // nouvelle méthode
+        startIntroCountdown();
     }
 
     private void drawScrollingBackground(Graphics g) {
@@ -102,7 +103,8 @@ public class WindowGame extends JFrame {
     private void startIntroCountdown() {
         new Thread(() -> {
             try {
-                playSound("321Go.wav");
+                music.playOnce("src/resources/sounds/321Go.wav");
+
                 for (int i = 3; i > 0; i--) {
                     String number = String.valueOf(i);
                     SwingUtilities.invokeLater(() -> countdownLabel.setText(number));
@@ -125,6 +127,7 @@ public class WindowGame extends JFrame {
     }
 
     private void startGameTimer() {
+        music.playLoop("src/resources/sounds/battleMusic.wav");
         new Thread(() -> {
             while (timeRemaining > 0) {
                 try {
@@ -139,21 +142,17 @@ public class WindowGame extends JFrame {
                     e.printStackTrace();
                 }
             }
+            music.stop();
 
             SwingUtilities.invokeLater(() -> {
+                music.stop();
                 JOptionPane.showMessageDialog(this, "Time's up!");
             });
         }).start();
     }
-    private void playSound(String fileName) {
-        try {
-            File soundFile = new File("src/resources/sounds/321Go.wav");
-            AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile);
-            Clip clip = AudioSystem.getClip();
-            clip.open(audioStream);
-            clip.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
+    // Nouvelle méthode pour récupérer gamePanel
+    public JPanel getGamePanel() {
+        return gamePanel;
     }
 }
