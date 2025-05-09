@@ -22,7 +22,10 @@ public class Meteorites {
 
     static {
         try {
-            meteoriteImage = ImageIO.read(new File("src/resources/meteorites.png"));
+            meteoriteImage = ImageIO.read(new File("src/resources/images/meteorites.png"));
+            if (meteoriteImage == null) {
+                System.out.println("Erreur : mtete est null !");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -48,6 +51,7 @@ public class Meteorites {
     }
 
     public void draw(Graphics g) {
+
         if (active && image != null) {
             Graphics2D g2d = (Graphics2D) g;
             AffineTransform oldTransform = g2d.getTransform();
@@ -63,6 +67,8 @@ public class Meteorites {
     }
 
     public void spawn(int screenWidth, int screenHeight, boolean sideView, Meteorites[] others) {
+        System.out.println("Météorite activée : (" + x + ", " + y + ")");
+
         this.sideView = sideView;
 
         for (int attempt = 0; attempt < 50; attempt++) {

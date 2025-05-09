@@ -45,8 +45,11 @@ public class Space_ship {
         y = (int) (frame.getHeight() * 0.75);
 
         try {
-            spaceShipFace = ImageIO.read(new File("src/resources/SpaceShip_face.png"));
-            spaceShipSide = ImageIO.read(new File("src/resources/SpaceShip_side.png"));
+            spaceShipFace = ImageIO.read(new File("src/resources/images/SpaceShip_face.png"));
+            if (spaceShipFace == null) {
+                System.out.println("Erreur : spaceShipFace est null !");
+            }
+//            spaceShipSide = ImageIO.read(new File("src/resources/SpaceShip_side.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }

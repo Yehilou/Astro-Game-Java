@@ -18,27 +18,28 @@ public class RunGame {
     public RunGame(WindowGame windowGame) {
         this.windowGame = windowGame;
 
-        // Chargement de l'image de fond
+        // Charger l'image de fond
         try {
-            backgroundImage = ImageIO.read(new File("src/resources/fondespace.jpg"));
+            backgroundImage = ImageIO.read(new File("src/resources/fondEspace.jpg"));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        // Création des météorites
+        // Créer les météorites
         for (int i = 0; i < maxMeteorites; i++) {
             meteorites[i] = new Meteorites();
         }
 
-        // Initialisation du vaisseau spatial
-        spaceShip = new Space_ship(windowGame);  // Instantiation du vaisseau
-        spaceShip.spaceShipControl(windowGame.getGamePanel()); // Passe le gamePanel au lieu de windowGame
 
-        // Initialisation du JPanel pour le rendu du jeu
+        spaceShip = new Space_ship(windowGame);
+        spaceShip.spaceShipControl(windowGame.getGamePanel());
+
+
         JPanel gamePanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
+
                 if (gameStarted) {
                     drawScrollingBackground(g);
                     spaceShip.dessiner(g);
@@ -49,10 +50,10 @@ public class RunGame {
             }
         };
         gamePanel.setBounds(0, 0, 800, 600);
-        gamePanel.setOpaque(false);
+        gamePanel.setOpaque(false); // On laisse WindowGame dessiner le fond
         windowGame.add(gamePanel);
 
-        // Démarrage de l'animation en arrière-plan
+        // Démarrer le défilement de l'arrière-plan
         startBackgroundScroll(gamePanel);
     }
 
@@ -83,12 +84,14 @@ public class RunGame {
         g.drawImage(backgroundImage, 0, backgroundY - height, null);
     }
 
+    // Cette méthode est appelée lorsque le jeu commence (pendant le décompte)
     public void startGame() {
         gameStarted = true;
-        // Logique du jeu
+
+        // Logique du jeu (mise à jour des météorites, etc.)
         new Thread(() -> {
             while (gameStarted) {
-                // Ici on peut implémenter la logique pour la mise à jour des météorites, des collisions, etc.
+                // Mettre à jour les météorites
                 for (Meteorites m : meteorites) {
                     m.update();
                 }
@@ -100,5 +103,9 @@ public class RunGame {
                 }
             }
         }).start();
+    }
+
+    public void stopGame() {
+        gameStarted = false;
     }
 }
