@@ -135,7 +135,7 @@ public class WindowGame extends JFrame {
     private void updateTimerLabel() {
         SwingUtilities.invokeLater(() -> {
             int minutes = timeRemaining / 60;
-            int seconds = timeRemaining % 60;
+            int seconds = timeRemaining %60;
             timerLabel.setText(String.format("Time: %02d:%02d", minutes, seconds));
         });
     }
