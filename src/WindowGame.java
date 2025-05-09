@@ -29,9 +29,6 @@ public class WindowGame extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(null);
 
-        // Charger l'image de fond
-        backgroundImage = new ImageIcon("src/resources/fondespace.jpg").getImage();
-
         // Créer l'étiquette du timer
         timerLabel = new JLabel();
         timerLabel.setFont(new Font("Arial", Font.BOLD, 24));
@@ -43,7 +40,8 @@ public class WindowGame extends JFrame {
         countdownLabel = new JLabel("", SwingConstants.CENTER);
         countdownLabel.setFont(new Font("Consolas", Font.BOLD, 100));
         countdownLabel.setForeground(Color.WHITE);
-        countdownLabel.setBounds(0, 200, 800, 100);
+        // Déplacer le décompte à gauche, en changeant les coordonnées de setBounds
+        countdownLabel.setBounds(100, 200, 600, 100); // Déplacement de l'étiquette vers la gauche
         add(countdownLabel);
 
         // Créer le bouton "Retour au menu"
@@ -63,17 +61,7 @@ public class WindowGame extends JFrame {
         add(backButton);
 
         // Créer le JPanel pour le jeu
-        gamePanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                if (inCountdown) {
-                    drawStaticBackground(g);  // Afficher fond statique pendant le décompte
-                } else if (gameStarted) {
-                    drawScrollingBackground(g);  // Afficher fond défilant pendant le jeu
-                }
-            }
-        };
+        gamePanel = new GamePanel(this); // Utilisation de GamePanel pour gérer le jeu
         gamePanel.setBounds(0, 0, 800, 600);
         gamePanel.setOpaque(false);
         add(gamePanel);
@@ -82,40 +70,6 @@ public class WindowGame extends JFrame {
 
         // Démarrer le décompte et la musique du décompte
         startIntroCountdown();
-    }
-
-    // Méthode pour dessiner le fond statique pendant le décompte
-    private void drawStaticBackground(Graphics g) {
-        g.drawImage(backgroundImage, 0, 0, null);  // Fond statique pendant le décompte
-    }
-
-    // Méthode pour dessiner le fond défilant pendant le jeu
-    private void drawScrollingBackground(Graphics g) {
-        int height = backgroundImage.getHeight(null);
-        g.drawImage(backgroundImage, 0, backgroundY, null);
-        g.drawImage(backgroundImage, 0, backgroundY - height, null);
-    }
-
-    // Méthode pour démarrer le défilement du fond après le décompte
-    private void startBackgroundScroll() {
-        new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(16);  // Approx. 60 FPS
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                if (gameStarted) {
-                    backgroundY += speed;  // Augmenter la position du fond
-                    if (backgroundY >= backgroundImage.getHeight(null)) {
-                        backgroundY = 0;  // Revenir au début de l'image lorsque le fond est complet
-                    }
-                }
-
-                gamePanel.repaint();  // Redessiner le fond
-            }
-        }).start();
     }
 
     // Méthode pour démarrer le décompte et afficher "321 GO!"
@@ -134,16 +88,18 @@ public class WindowGame extends JFrame {
                 // Afficher "GO!"
                 SwingUtilities.invokeLater(() -> countdownLabel.setText("GO!"));
                 Thread.sleep(1000);  // Attendre encore 1 seconde
+                GamePanel.gameStarted = true;
 
                 // Cacher le décompte et démarrer le jeu
                 SwingUtilities.invokeLater(() -> {
                     countdownLabel.setVisible(false);  // Cacher l'étiquette du décompte
                     inCountdown = false;  // Passer en mode jeu
                     gameStarted = true;  // Le jeu commence ici
-                    startBackgroundScroll();  // Démarrer le défilement du fond
                     music.stop();  // Stopper la musique de décompte
                     music.playLoop("src/resources/sounds/battleMusic.wav");  // Démarrer la musique de jeu
-                    new RunGame(this).startGame();  // Lancer la logique du jeu
+
+                    // Démarrer le timer pour le jeu
+                    startGameTimer();
                 });
 
             } catch (InterruptedException e) {
@@ -152,32 +108,36 @@ public class WindowGame extends JFrame {
         }).start();
     }
 
-    // Méthode pour démarrer le timer du jeu (compte à rebours)
+    // Méthode pour démarrer le timer du jeu
     private void startGameTimer() {
-        music.playLoop("src/resources/sounds/battleMusic.wav");  // Jouer la musique de fond du jeu
         new Thread(() -> {
-            while (timeRemaining > 0) {
+            while (gameStarted && timeRemaining > 0) {
                 try {
                     Thread.sleep(1000);  // Attendre 1 seconde
-                    timeRemaining--;  // Diminuer le temps restant
-
-                    // Mettre à jour le label du timer
-                    SwingUtilities.invokeLater(() -> {
-                        timerLabel.setText("Time: " + (timeRemaining / 60) + ":" + String.format("%02d", timeRemaining % 60));
-                    });
-
+                    timeRemaining--;
+                    updateTimerLabel();  // Mettre à jour l'étiquette du timer
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-            music.stop();  // Arrêter la musique lorsque le temps est écoulé
 
-            // Afficher un message de fin de jeu
-            SwingUtilities.invokeLater(() -> {
-                music.stop();
-                JOptionPane.showMessageDialog(this, "Time's up!");
-            });
+            // Si le temps est écoulé, afficher la fin du jeu
+            if (timeRemaining <= 0) {
+                SwingUtilities.invokeLater(() -> {
+                    timerLabel.setText("Time's up!");
+                    // Ajouter ici les actions à effectuer quand le temps est écoulé (ex: fin du jeu)
+                });
+            }
         }).start();
+    }
+
+    // Méthode pour mettre à jour l'étiquette du timer
+    private void updateTimerLabel() {
+        SwingUtilities.invokeLater(() -> {
+            int minutes = timeRemaining / 60;
+            int seconds = timeRemaining % 60;
+            timerLabel.setText(String.format("Time: %02d:%02d", minutes, seconds));
+        });
     }
 
     // Getter pour gamePanel
