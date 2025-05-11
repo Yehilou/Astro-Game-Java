@@ -76,16 +76,19 @@ public class LevelSelector extends JFrame {
 
             int speed = 1;
             int duration = 90;
+            int lives = 4;
 
             if (levelName.equalsIgnoreCase("level 2")) {
                 speed = 2;
                 duration = 150;
+                lives = 3;
             } else if (levelName.equalsIgnoreCase("level 3")) {
                 speed = 3;
                 duration = 240;
+                lives = 3;
             }
 
-            new WindowGame(speed, duration);
+            new WindowGame(speed, duration , lives);
         });
 
         return button;

@@ -11,16 +11,18 @@ public class WindowGame extends JFrame {
     private JLabel countdownLabel;
     private boolean gameStarted = false;
     private boolean inCountdown = true;  // Flag pour savoir si on est en mode décompte ou jeu
-
     private Music music;
-
     private JPanel gamePanel; // Déclare un attribut pour gamePanel
+    private int lives;
+    private JPanel livesPanel;
+    private ImageIcon heartIcon;
 
-    public WindowGame(int speed, int timerDuration) {
+    public WindowGame(int speed, int timerDuration , int lives) {
         this.speed = speed;
         this.timerDuration = timerDuration;
         this.timeRemaining = timerDuration;
         this.music = new Music(); // MODIFICATION
+        this.lives = lives;
 
         setTitle("Space Game");
         setSize(800, 600);
@@ -59,6 +61,19 @@ public class WindowGame extends JFrame {
             new MenuPrincipal().setVisible(true);
         });
         add(backButton);
+
+
+
+        heartIcon = new ImageIcon("src/resources/images/livesHeart.png");
+        Image scaledImage = heartIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+        heartIcon = new ImageIcon(scaledImage);
+        livesPanel = new JPanel();
+        livesPanel.setBounds(10, 50, 200, 40);
+        livesPanel.setOpaque(false);
+        livesPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        add(livesPanel);
+        updateLivesDisplay();
+
 
         // Créer le JPanel pour le jeu
         gamePanel = new GamePanel(this); // Utilisation de GamePanel pour gérer le jeu
@@ -124,8 +139,17 @@ public class WindowGame extends JFrame {
             // Si le temps est écoulé, afficher la fin du jeu
             if (timeRemaining <= 0) {
                 SwingUtilities.invokeLater(() -> {
-                    timerLabel.setText("Time's up!");
-                    // Ajouter ici les actions à effectuer quand le temps est écoulé (ex: fin du jeu)
+//                        timerLabel.setText("Time's up!")
+                    showEndScreen("src/resources/images/you_winn.png");
+                    gameStarted = false;
+                        music.stop();
+                        if (lives > 0) { // en gros si la vie et plus grand que 0 il winn  else il perd
+                            JOptionPane.showMessageDialog(this, "You Win!");
+                        } else {
+                            JOptionPane.showMessageDialog(this, "Game Over!");
+                        }
+                        dispose();
+                        new MenuPrincipal().setVisible(true);
                 });
             }
         }).start();
@@ -144,4 +168,62 @@ public class WindowGame extends JFrame {
     public JPanel getGamePanel() {
         return gamePanel;
     }
+    public void loseLife() {
+        lives--;
+        updateLivesDisplay();
+        if (lives <= 0) {
+            gameStarted = false;
+            music.stop();
+            showEndScreen("src/resources/images/game_over.png");
+            dispose();
+            new MenuPrincipal().setVisible(true);
+        }
+    }
+
+
+    private void updateLivesDisplay() {
+        livesPanel.removeAll();
+        for (int i = 0; i < lives; i++) {
+            JLabel heartLabel = new JLabel(heartIcon);
+            livesPanel.add(heartLabel);
+        }
+        livesPanel.revalidate();
+        livesPanel.repaint();
+    }
+
+
+    private void showEndScreen(String imagePath) {
+        JPanel endPanel = new JPanel() {
+            private Image endImage = new ImageIcon(imagePath).getImage();
+
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(endImage, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+
+        endPanel.setBounds(0, 0, getWidth(), getHeight());
+        endPanel.setLayout(null);
+        setContentPane(endPanel);
+        revalidate();  // important pour mettre à jour l'affichage
+        repaint();
+
+        // Thread pour attendre puis revenir au menu
+        new Thread(() -> {
+            try {
+                Thread.sleep(3000); // attendre 3 secondes
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            SwingUtilities.invokeLater(() -> {
+                dispose();
+                new MenuPrincipal().setVisible(true);
+            });
+        }).start();
+    }
+
+
+
 }
