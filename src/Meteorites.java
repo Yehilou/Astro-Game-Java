@@ -65,6 +65,10 @@ public class Meteorites {
 
     // Dessine la météorite avec rotation
     public void draw(Graphics g) {
+
+        g.setColor(Color.YELLOW);
+        Rectangle r = bounds();
+        g.drawRect(r.x, r.y, r.width, r.height);
         if (active && image != null) {
             Graphics2D g2d = (Graphics2D) g; // Utilise Graphics2D pour plus de contrôles
             AffineTransform oldTransform = g2d.getTransform(); // Sauvegarde l'état initial du graphique
@@ -135,12 +139,14 @@ public class Meteorites {
 
     // Retourne un Rectangle pour la détection de collisions, avec une réduction pour rendre la détection plus précise
     public Rectangle bounds() {
-        int reducedWidth = (int)(width * 0.85);
-        int reducedHeight = (int)(height * 0.85);
+        int reducedWidth = (int)(width * 0.75);  // Réduction plus importante
+        int reducedHeight = (int)(height * 0.75);
         int offsetX = (width - reducedWidth) / 2;
         int offsetY = (height - reducedHeight) / 2;
         return new Rectangle(x + offsetX, y + offsetY, reducedWidth, reducedHeight);
+
     }
+
 
     // Accesseurs et mutateurs pour l'état de la météorite
     public boolean isActive() {

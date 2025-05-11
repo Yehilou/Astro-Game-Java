@@ -11,11 +11,11 @@ public class RulesWindow extends JFrame {
 
 
         JPanel backgroundPanel = new JPanel() {
-            private ImageIcon background = new ImageIcon("src/resources/Spacebackground.gif");
+            private final ImageIcon backGround = new ImageIcon("src/resources/Spacebackground.gif");
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                g.drawImage(background.getImage(), 0, 0, getWidth(), getHeight(), this);
+                g.drawImage(backGround.getImage(), 0, 0, getWidth(), getHeight(), this);
             }
         };
         backgroundPanel.setLayout(new BorderLayout());
@@ -29,14 +29,20 @@ public class RulesWindow extends JFrame {
         rulesText.setForeground(Color.WHITE);
         rulesText.setFont(new Font("Consolas", Font.BOLD, 18));
         rulesText.setText(
-                "              Welcome to Space Game!\n\n" +
-                        "   Objective:\n" +
-                        "   - Avoid asteroids and survive until timer is           gone.\n\n" +
-                        "   - Collect power-ups (items) to gain advantages.\n\n" +
-                        "   Controls:\n" +
-                        "   - Arrow keys to move\n" +
-                        "   - Spacebar to use items\n\n" +
-                        "   Good luck, pilot!"
+                """
+                                      Welcome to Space Game!
+                        
+                           Objective:
+                           - Avoid asteroids and survive until timer is             gone.
+                        
+                           - Collect power-ups (items) to gain advantages.
+                        
+                           Controls:
+                           - Arrow keys to move
+                           - Spacebar to use items
+                        
+                           Good luck, pilot!\
+                        """
         );
         rulesText.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         backgroundPanel.add(rulesText, BorderLayout.CENTER);

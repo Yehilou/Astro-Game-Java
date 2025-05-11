@@ -124,6 +124,9 @@ public class Space_ship {
 
     // Méthode pour dessiner le vaisseau dans la fenêtre
     public void dessiner(Graphics g) {
+        g.setColor(Color.GREEN);
+        Rectangle r = bounds();
+        g.drawRect(r.x, r.y, r.width, r.height);
         Image imageToDraw; // Image à dessiner
         int width; // Largeur du vaisseau
         int height; // Hauteur du vaisseau
@@ -155,8 +158,13 @@ public class Space_ship {
 
     // Méthode pour obtenir les limites du vaisseau (utilisé pour les collisions)
     public Rectangle bounds() {
-        int width = vueChangee ? 120 : 100; // Largeur en fonction de la vue
-        int height = vueChangee ? 60 : 100; // Hauteur en fonction de la vue
-        return new Rectangle(x, y, width, height); // Retourne un rectangle représentant les limites du vaisseau
+        int width = vueChangee ? 90 : 70; // largeur réduite pour être plus proche de l’image réelle
+        int height = vueChangee ? 40 : 70;
+        int offsetX = 15;
+        int offsetY = vueChangee ? 10 : 15;
+        return new Rectangle(x + offsetX, y + offsetY, width, height);
     }
+
+
+
 }
