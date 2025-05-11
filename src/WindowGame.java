@@ -17,6 +17,7 @@ public class WindowGame extends JFrame {
     private JPanel livesPanel;
     private ImageIcon heartIcon;
 
+
     public WindowGame(int speed, int timerDuration , int lives) {
         this.speed = speed;
         this.timerDuration = timerDuration;
@@ -76,7 +77,7 @@ public class WindowGame extends JFrame {
 
 
         // Créer le JPanel pour le jeu
-        gamePanel = new GamePanel(this); // Utilisation de GamePanel pour gérer le jeu
+        gamePanel = new GamePanel(this,this); // Utilisation de GamePanel pour gérer le jeu
         gamePanel.setBounds(0, 0, 800, 600);
         gamePanel.setOpaque(false);
         add(gamePanel);

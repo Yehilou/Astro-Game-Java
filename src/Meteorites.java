@@ -172,4 +172,8 @@ public class Meteorites {
     public int getHeight() {
         return height;
     }
+
+    public void setActive(boolean b) {
+        this.active = b;
+    }
 }

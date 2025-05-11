@@ -22,7 +22,11 @@ public class GamePanel extends JPanel {
     private final int maxMeteorites = 10; // Nombre maximum de météorites
     private Meteorites[] meteorites = new Meteorites[maxMeteorites]; // Tableau de météorites
     private int frameCounter = 0; // Compteur de frames pour les actions périodiques
-    private boolean meteoritesActive = true; // Indicateur si les météorites sont actives
+    private boolean meteoritesActive = true;
+    private WindowGame windowGame;
+    private long lastHitTime = 0;
+    private final int invulnerabilityDuration = 2000; // 2 seconde d'invulnérabilité après un hit
+// Indicateur si les météorites sont actives
 
     // Méthode pour alterner la vue (de face à côté et vice-versa)
     public void switchView() {
@@ -100,7 +104,10 @@ public class GamePanel extends JPanel {
     }
 
     // Constructeur de la classe GamePanel
-    public GamePanel(JFrame frame) {
+    public GamePanel(JFrame frame,WindowGame WindowGame) {
+        this.windowGame = WindowGame;
+
+
         setFocusable(true); // Permet à la fenêtre de recevoir des événements de clavier
         requestFocusInWindow(); // Demande le focus pour recevoir les événements de clavier
 
@@ -259,10 +266,19 @@ public class GamePanel extends JPanel {
 
     // Méthode pour vérifier les collisions entre le vaisseau et les météorites
     public void verifyIfCollision(Space_ship spaceShip, Meteorites[] meteorites) {
-        for (Meteorites m : meteorites) {
-            if (m.isActive() && spaceShip.bounds().intersects(m.bounds())) {
-                System.out.println("collision"); // Affiche "collision" dans la console
+        try {
+            for (Meteorites m : meteorites) {
+                if (m.isActive() && spaceShip.bounds().intersects(m.bounds())) {
+                    System.out.println("Collision détectée !");
+                    windowGame.loseLife();  // Appel direct ici
+                    m.setActive(false);     // Pour désactiver la météorite après impact
+                    break;
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();  // Affiche le détail du crash dans la console
         }
     }
+
+
 }
