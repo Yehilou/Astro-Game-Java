@@ -27,6 +27,7 @@ public class GamePanel extends JPanel {
     private long lastHitTime = 0;
     private final int invulnerabilityDuration = 2000; // 2 seconde d'invulnérabilité après un hit
 // Indicateur si les météorites sont actives
+    private boolean gameOver = false;
 
     // Méthode pour alterner la vue (de face à côté et vice-versa)
     public void switchView() {
@@ -266,19 +267,29 @@ public class GamePanel extends JPanel {
 
     // Méthode pour vérifier les collisions entre le vaisseau et les météorites
     public void verifyIfCollision(Space_ship spaceShip, Meteorites[] meteorites) {
+        if (gameOver) {  // Si le jeu est terminé, on arrête la détection des collisions
+            return;
+        }
+
         try {
             for (Meteorites m : meteorites) {
                 if (m.isActive() && spaceShip.bounds().intersects(m.bounds())) {
                     System.out.println("Collision détectée !");
-                    windowGame.loseLife();  // Appel direct ici
-                    m.setActive(false);     // Pour désactiver la météorite après impact
-                    break;
+                    windowGame.loseLife();  // Appel direct ici pour perdre une vie
+                    m.setActive(false);     // Désactive la météorite après impact
+                    break; // On sort de la boucle après la première collision
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();  // Affiche le détail du crash dans la console
         }
     }
+
+    public void gameOver() {
+        gameOver = true;  // Marque le jeu comme terminé
+        // Ici, tu peux ajouter des actions supplémentaires, comme afficher "Game Over"
+    }
+
 
 
 }

@@ -170,6 +170,8 @@ public class WindowGame extends JFrame {
         return gamePanel;
     }
     public void loseLife() {
+        if (!gameStarted) return;
+
         lives--;
         updateLivesDisplay();
         if (lives <= 0) {
@@ -177,7 +179,7 @@ public class WindowGame extends JFrame {
             music.stop();
             showEndScreen("src/resources/images/game_over.png");
             dispose();
-            new MenuPrincipal().setVisible(true);
+
         }
     }
 
