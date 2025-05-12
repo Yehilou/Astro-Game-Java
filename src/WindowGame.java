@@ -203,6 +203,7 @@ public class WindowGame extends JFrame {
             }
 
             SwingUtilities.invokeLater(() -> {
+                ((GamePanel) gamePanel).stopGameThread(); // stoppe proprement le thread
                 dispose();
                 new MenuPrincipal().setVisible(true);
             });

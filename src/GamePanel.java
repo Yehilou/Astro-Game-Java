@@ -28,6 +28,7 @@ public class GamePanel extends JPanel {
     private final int invulnerabilityDuration = 2000; // 2 seconde d'invulnérabilité après un hit
 // Indicateur si les météorites sont actives
     private boolean gameOver = false;
+    private Thread gameThread;
 
     // Méthode pour alterner la vue (de face à côté et vice-versa)
     public void switchView() {
@@ -128,6 +129,7 @@ public class GamePanel extends JPanel {
         }
 
         // Initialise un Timer pour vérifier si le panneau est prêt
+        // Initialise un Timer pour vérifier si le panneau est prêt
         Timer initTimer = new Timer(50, e -> {
             if (getWidth() > 0 && getHeight() > 0 && spaceBackground != null && !initialized) {
                 initialized = true;
@@ -137,9 +139,9 @@ public class GamePanel extends JPanel {
                 x1 = 0;
                 x2 = -getWidth();
 
-                // Crée un thread pour gérer les mises à jour du jeu
-                new Thread(() -> {
-                    while (true) {
+                // Crée et démarre un thread pour gérer les mises à jour du jeu
+                gameThread = new Thread(() -> { // <-- Le thread est assigné ici
+                    while (!Thread.currentThread().isInterrupted()) { // <-- Condition propre
                         // Mise à jour des positions du fond en fonction de la vue
                         if (sideView) {
                             x1 += scrollSpeed;
@@ -153,18 +155,16 @@ public class GamePanel extends JPanel {
                             if (y2 >= getHeight()) y2 = y1 - getHeight();
                         }
 
-                        frameCounter++; // Incrémente le compteur de frames
+                        frameCounter++;
                         if (meteoritesActive && frameCounter % 60 == 0) {
-                            spawnMeteorites(); // Spawne de nouvelles météorites chaque seconde
+                            spawnMeteorites();
                         }
 
-                        // Mise à jour des météorites et détection de collisions
                         for (Meteorites m : meteorites) {
                             m.update();
-                            verifyIfCollision(spaceShip, meteorites); // Vérifie si le vaisseau entre en collision avec une météorite
+                            verifyIfCollision(spaceShip, meteorites);
                         }
 
-                        // Détection de collisions entre les météorites
                         for (int i = 0; i < meteorites.length; i++) {
                             Meteorites m1 = meteorites[i];
                             if (!m1.isActive()) continue;
@@ -175,21 +175,22 @@ public class GamePanel extends JPanel {
                                 if (!m2.isActive()) continue;
                                 Rectangle r2 = new Rectangle(m2.getX(), m2.getY(), m2.getWidth(), m2.getHeight());
                                 if (r1.intersects(r2)) {
-                                    m1.deactivate(); // Désactive la météorite m1
-                                    m2.deactivate(); // Désactive la météorite m2
-                                    break; // Sort de la boucle dès qu'une collision est détectée
+                                    m1.deactivate();
+                                    m2.deactivate();
+                                    break;
                                 }
                             }
                         }
 
-                        repaint(); // Repeint le panneau après chaque mise à jour
+                        repaint();
                         try {
-                            Thread.sleep(16); // Pause pour obtenir un taux de rafraîchissement constant
+                            Thread.sleep(16);
                         } catch (InterruptedException ex) {
-                            ex.printStackTrace();
+                            Thread.currentThread().interrupt(); // Bonne pratique
                         }
                     }
-                }).start();
+                });
+                gameThread.start(); // <-- Le thread démarre ici
 
                 // Planifie le premier changement de vue après un délai aléatoire
                 int firstDelay = 60_000 + (int)(Math.random() * 120_000);
@@ -197,6 +198,7 @@ public class GamePanel extends JPanel {
             }
         });
         initTimer.start(); // Démarre le Timer pour initialiser le jeu
+
     }
 
     // Méthode pour dessiner les éléments du jeu sur l'écran
@@ -288,6 +290,12 @@ public class GamePanel extends JPanel {
     public void gameOver() {
         gameOver = true;  // Marque le jeu comme terminé
         // Ici, tu peux ajouter des actions supplémentaires, comme afficher "Game Over"
+    }
+
+    public void stopGameThread() {
+        if (gameThread != null && gameThread.isAlive()) {
+            gameThread.interrupt();
+        }
     }
 
 
