@@ -26,7 +26,7 @@ public class GamePanel extends JPanel {
     private WindowGame windowGame;
     private long lastHitTime = 0;
     private final int invulnerabilityDuration = 2000; // 2 seconde d'invulnérabilité après un hit
-// Indicateur si les météorites sont actives
+    // Indicateur si les météorites sont actives
     private boolean gameOver = false;
     private Thread gameThread;
 
@@ -154,7 +154,7 @@ public class GamePanel extends JPanel {
                             if (y1 >= getHeight()) y1 = y2 - getHeight();
                             if (y2 >= getHeight()) y2 = y1 - getHeight();
                         }
-
+                        spaceShip.updatePosition(this);
                         frameCounter++;
                         if (meteoritesActive && frameCounter % 60 == 0) {
                             spawnMeteorites();
