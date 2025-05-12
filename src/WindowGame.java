@@ -128,6 +128,7 @@ public class WindowGame extends JFrame {
             if (timeRemaining <= 0) {
                 SwingUtilities.invokeLater(() -> {
                     gameStarted = false;
+                    GamePanel.gameStarted = false;
                     music.stop();
                     showEndScreen("src/resources/images/you_winn.png");
 
@@ -158,9 +159,9 @@ public class WindowGame extends JFrame {
         updateLivesDisplay();
         if (lives <= 0) {
             gameStarted = false;
+            GamePanel.gameStarted = false;
             music.stop();
             showEndScreen("src/resources/images/game_over.png");
-            // ❌ Ne plus appeler dispose() ici
         }
     }
 
