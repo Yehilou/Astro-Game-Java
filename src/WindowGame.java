@@ -130,7 +130,7 @@ public class WindowGame extends JFrame {
                     gameStarted = false;
                     GamePanel.gameStarted = false;
                     music.stop();
-                    showEndScreen("src/resources/images/you_winn.png");
+                    showEndScreen("src/resources/images/game_win.png");
 
                     if (lives > 0) {
                         JOptionPane.showMessageDialog(this, "You Win!");
@@ -161,7 +161,7 @@ public class WindowGame extends JFrame {
             gameStarted = false;
             GamePanel.gameStarted = false;
             music.stop();
-            showEndScreen("src/resources/images/game_over.png");
+            showEndScreen("src/resources/images/game_finisha.png");
         }
     }
 
@@ -179,27 +179,39 @@ public class WindowGame extends JFrame {
         if (menuAlreadyOpened) return;
         menuAlreadyOpened = true;
 
-        JPanel endPanel = new JPanel() {
-            private Image endImage = new ImageIcon(imagePath).getImage();
-
+        // Panneau avec fond spatial (on suppose que le fond était déjà dans gamePanel)
+        JPanel endPanel = new JPanel(null) {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                g.drawImage(endImage, 0, 0, getWidth(), getHeight(), this);
+                gamePanel.paint(g); // Réutilise le fond spatial actuel
             }
         };
 
         endPanel.setBounds(0, 0, getWidth(), getHeight());
-        endPanel.setLayout(null);
+
+        // Image clignotante (game over ou win)
+        JLabel flashingLabel = new JLabel(new ImageIcon(imagePath));
+        flashingLabel.setBounds(150, 50, 500, 500); // ajuste les positions selon le design
+        endPanel.add(flashingLabel);
+
         setContentPane(endPanel);
         revalidate();
         repaint();
 
+        // Thread pour faire clignoter l'image
         new Thread(() -> {
-            try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            int duration = 3000; // 3 secondes
+            int interval = 300;  // toutes les 300 ms
+            long startTime = System.currentTimeMillis();
+
+            while (System.currentTimeMillis() - startTime < duration) {
+                SwingUtilities.invokeLater(() -> flashingLabel.setVisible(!flashingLabel.isVisible()));
+                try {
+                    Thread.sleep(interval);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
 
             SwingUtilities.invokeLater(() -> {
@@ -209,4 +221,5 @@ public class WindowGame extends JFrame {
             });
         }).start();
     }
+
 }

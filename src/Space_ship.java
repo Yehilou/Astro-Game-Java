@@ -121,13 +121,7 @@ public class Space_ship {
             }
         }
 
-        // Ajouter un log pour vérifier les valeurs des positions
-        System.out.println("y: " + y + ", scaledHeight: " + scaledHeight);
     }
-
-
-
-
 
     private void repositionIfOutOfZone() {
         int panelWidth = frame.getWidth();
