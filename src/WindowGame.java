@@ -15,6 +15,7 @@ public class WindowGame extends JFrame {
     private int lives;
     private JPanel livesPanel;
     private ImageIcon heartIcon;
+    private boolean isWin; // pour le son de la fin ( si il est false bas sa lancera game over )
 
     public WindowGame(int speed, int timerDuration, int lives) {
         this.speed = speed;
@@ -127,16 +128,12 @@ public class WindowGame extends JFrame {
 
             if (timeRemaining <= 0) {
                 SwingUtilities.invokeLater(() -> {
+                    isWin = true;
                     gameStarted = false;
                     GamePanel.gameStarted = false;
                     music.stop();
-                    showEndScreen("src/resources/images/game_win.png");
+                    showEndScreen("src/resources/images/game_win.png" , isWin);
 
-                    if (lives > 0) {
-                        JOptionPane.showMessageDialog(this, "You Win!");
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Game Over!");
-                    }
                 });
             }
         }).start();
@@ -155,13 +152,15 @@ public class WindowGame extends JFrame {
     }
 
     public void loseLife() {
+        music.playOnce("src/resources/sounds/lostlife.wav");
         lives--;
         updateLivesDisplay();
         if (lives <= 0) {
+            isWin = false;
             gameStarted = false;
             GamePanel.gameStarted = false;
             music.stop();
-            showEndScreen("src/resources/images/game_finisha.png");
+            showEndScreen("src/resources/images/game_finisha.png" , isWin);
         }
     }
 
@@ -175,9 +174,15 @@ public class WindowGame extends JFrame {
         livesPanel.repaint();
     }
 
-    private void showEndScreen(String imagePath) {
+    private void showEndScreen(String imagePath , boolean isWin) {
         if (menuAlreadyOpened) return;
         menuAlreadyOpened = true;
+
+        if (isWin){
+            music.playOnce("src/resources/sounds/you_win.wav");
+        } else {
+            music.playOnce("src/resources/sounds/game_over.wav");
+        }
 
         // Panneau avec fond spatial (on suppose que le fond était déjà dans gamePanel)
         JPanel endPanel = new JPanel(null) {
@@ -201,7 +206,7 @@ public class WindowGame extends JFrame {
 
         // Thread pour faire clignoter l'image
         new Thread(() -> {
-            int duration = 3000; // 3 secondes
+            int duration = 4000; // 4 secondes
             int interval = 300;  // toutes les 300 ms
             long startTime = System.currentTimeMillis();
 
