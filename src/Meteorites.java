@@ -24,7 +24,7 @@ public class Meteorites {
     // Chargement de l'image de la météorite (effectué une seule fois pour toutes les météorites)
     static {
         try {
-            meteoriteImage = ImageIO.read(new File("src/resources/images/meteorites.png"));
+            meteoriteImage = ImageIO.read(new File("src/resources/images/Meteorite/meteorites.png"));
         } catch (IOException e) {
             e.printStackTrace(); // Gestion des erreurs de chargement d'image
         }

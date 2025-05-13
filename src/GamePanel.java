@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
 public class GamePanel extends JPanel {
@@ -29,6 +30,8 @@ public class GamePanel extends JPanel {
     // Indicateur si les météorites sont actives
     private boolean gameOver = false;
     private Thread gameThread;
+
+    private ArrayList<Explosion> explosions = new ArrayList<>();
 
     // Méthode pour alterner la vue (de face à côté et vice-versa)
     public void switchView() {
@@ -118,7 +121,7 @@ public class GamePanel extends JPanel {
 
         // Charge l'image du fond de l'espace
         try {
-            spaceBackground = ImageIO.read(new File("src/resources/images/fondEspace.jpg"));
+            spaceBackground = ImageIO.read(new File("src/resources/images/Space/spaceBackgroundGame.jpg"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -141,6 +144,9 @@ public class GamePanel extends JPanel {
 
                 // Crée et démarre un thread pour gérer les mises à jour du jeu
                 gameThread = new Thread(() -> {
+                    if(gameOver){
+                        return;
+                    }
                     while (!Thread.currentThread().isInterrupted()) {
                         // Mise à jour des positions du fond
                         if (sideView) {
@@ -208,8 +214,14 @@ public class GamePanel extends JPanel {
 
         // Dessin des météorites
         for (Meteorites m : meteorites) {
-            m.draw(g);
+            if(m.isActive()){
+                m.draw(g);
+            }
         }
+
+        updateExplosions(g);
+
+
 
         // Dessin du vaisseau
         spaceShip.dessiner(g);
@@ -258,59 +270,86 @@ public class GamePanel extends JPanel {
 
     // Méthode pour vérifier les collisions entre le vaisseau et les météorites
     public void verifyIfCollision(Space_ship spaceShip, Meteorites[] meteorites) {
-        if (gameOver) {  // Si le jeu est terminé, on arrête la détection des collisions
+        if (gameOver) {
             return;
         }
 
         try {
-            // On obtient le Polygon du vaisseau
             Polygon shipPolygon = spaceShip.getPolygon();
 
+            // --- Collision vaisseau / météorite ---
             for (Meteorites m : meteorites) {
                 if (m.isActive()) {
-                    // On obtient le Polygon de la météorite
                     Polygon meteorPolygon = m.getPolygon();
 
-                    // Vérification plus précise des intersections de Polygons
                     if (shipPolygon.intersects(meteorPolygon.getBounds())) {
-                        System.out.println("Collision détectée !");
-                        windowGame.loseLife();  // Appel direct ici pour perdre une vie
-                        m.setActive(false);     // Désactive la météorite après impact
-                        break; // On sort de la boucle après la première collision
-                    }
-
-                }
-            }
-
-            // Détection de collision entre les météorites
-            for (int i = 0; i < meteorites.length; i++) {
-                Meteorites m1 = meteorites[i];
-                if (!m1.isActive()) continue;
-
-                Polygon p1 = m1.getPolygon();
-
-                for (int j = i + 1; j < meteorites.length; j++) {
-                    Meteorites m2 = meteorites[j];
-                    if (!m2.isActive()) continue;
-
-                    Polygon p2 = m2.getPolygon();
-
-                    if (p1.intersects(p2.getBounds())) {
-                        // Collision détectée : désactive les deux
-                        m1.setActive(false);
-                        m2.setActive(false);
+                        if (!spaceShip.isInvulnerable()) {
+                            System.out.println("Collision avec météorite !");
+                            windowGame.loseLife();
+                            spaceShip.setInvulnerable();
+                        }
+                        m.setActive(false);
                         break;
                     }
                 }
             }
 
+            // --- Collision météorite / météorite ---
+            for (int i = 0; i < meteorites.length; i++) {
+                Meteorites m1 = meteorites[i];
+                if (!m1.isActive()) continue;
+                Polygon p1 = m1.getPolygon();
+
+                for (int j = i + 1; j < meteorites.length; j++) {
+                    Meteorites m2 = meteorites[j];
+                    if (!m2.isActive()) continue;
+                    Polygon p2 = m2.getPolygon();
+
+                    if (p1.intersects(p2.getBounds())) {
+                        m1.setActive(false);
+                        m2.setActive(false);
+
+                        int centerX = (m1.getX() + m2.getX()) / 2;
+                        int centerY = (m1.getY() + m2.getY()) / 2;
+                        int explosionWidth = Math.max(m1.getWidth(), m2.getWidth()) + 200;
+                        int explosionHeight = Math.max(m1.getHeight(), m2.getHeight()) + 200;
+
+                        int explosionX = centerX - explosionWidth / 2;
+                        int explosionY = centerY - explosionHeight / 2;
+
+                        createExplosion(explosionX, explosionY, explosionWidth, explosionHeight);
+
+                        break;
+                    }
+                }
+            }
+
+            // --- Collision vaisseau / explosion ---
+            for (Explosion explosion : explosions) {
+                if (explosion.isActive()) {
+                    Rectangle explosionRect = new Rectangle(
+                            explosion.getX(),
+                            explosion.getY(),
+                            explosion.getWidth(),
+                            explosion.getHeight()
+                    );
+
+                    if (explosionRect.intersects(shipPolygon.getBounds())) {
+                        if (!spaceShip.isInvulnerable()) {
+                            System.out.println("Collision avec explosion !");
+                            windowGame.loseLife();
+                            spaceShip.setInvulnerable();
+                        }
+                        break;
+                    }
+                }
+            }
 
         } catch (Exception e) {
-            e.printStackTrace();  // Affiche le détail du crash dans la console
+            e.printStackTrace();
         }
-
-
     }
+
 
 
     public void gameOver() {
@@ -322,6 +361,37 @@ public class GamePanel extends JPanel {
         if (gameThread != null && gameThread.isAlive()) {
             gameThread.interrupt();
         }
+    }
+
+    public void createExplosion(int x, int y, int width, int height){
+        explosions.add(new Explosion(x, y, width, height));
+
+    }
+
+    public void updateExplosions(Graphics g){
+        for(int i = 0; i < explosions.size(); i++){
+            Explosion explosion = explosions.get(i);
+            explosion.update();
+
+            if(!explosion.isActive()){
+                explosions.remove(i);
+                i--;
+            }
+        }
+
+        for(Explosion explosion : explosions){
+            if(explosion.isActive()){
+                explosion.draw(g);
+
+            // Affiche la hitbox circulaire en rouge
+                Graphics2D g2d = (Graphics2D) g;
+                g2d.setColor(Color.RED);
+                g2d.draw(explosion.getHitbox());
+            }
+        }
+
+
+
     }
 
 

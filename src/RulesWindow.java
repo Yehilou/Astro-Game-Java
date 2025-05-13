@@ -11,7 +11,7 @@ public class RulesWindow extends JFrame {
 
 
         JPanel backgroundPanel = new JPanel() {
-            private final ImageIcon backGround = new ImageIcon("src/resources/Spacebackground.gif");
+            private final ImageIcon backGround = new ImageIcon("src/resources/SpaceBackground.gif");
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);

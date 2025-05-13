@@ -62,7 +62,7 @@ public class WindowGame extends JFrame {
         add(backButton);
 
         // Lives panel (hearts)
-        heartIcon = new ImageIcon("src/resources/images/livesHeart.png");
+        heartIcon = new ImageIcon("src/resources/images/Heart/livesHeart.png");
         Image scaledImage = heartIcon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
         heartIcon = new ImageIcon(scaledImage);
         livesPanel = new JPanel();
@@ -132,7 +132,7 @@ public class WindowGame extends JFrame {
                     gameStarted = false;
                     GamePanel.gameStarted = false;
                     music.stop();
-                    showEndScreen("src/resources/images/game_win.png" , isWin);
+                    showEndScreen("src/resources/images/Game_Ends/game_win.png" , isWin);
 
                 });
             }
@@ -160,7 +160,7 @@ public class WindowGame extends JFrame {
             gameStarted = false;
             GamePanel.gameStarted = false;
             music.stop();
-            showEndScreen("src/resources/images/game_finisha.png" , isWin);
+            showEndScreen("src/resources/images/Game_Ends/game_lose.png" , isWin);
         }
     }
 

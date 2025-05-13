@@ -30,7 +30,7 @@ public class MenuPrincipal extends JFrame {
 
 
         JPanel backroundPanel = new JPanel() {
-            private ImageIcon background = new ImageIcon("src/resources/Spacebackground.gif");
+            private ImageIcon background = new ImageIcon("src/resources/images/Space/SpaceBackground.gif");
 
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);

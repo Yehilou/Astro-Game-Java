@@ -15,7 +15,7 @@ public class LevelSelector extends JFrame {
 
 
         JPanel panel = new JPanel() {
-            private ImageIcon background = new ImageIcon("src/resources/Spacebackground.gif");
+            private ImageIcon background = new ImageIcon("src/resources/images/Space/SpaceBackground.gif");
 
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
