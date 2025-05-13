@@ -102,7 +102,7 @@ public class Space_ship {
                 y -= speed;
 
             // Limiter le mouvement vers le bas (empêcher de descendre au-delà de 475)
-            if (keysPressed.contains(KeyEvent.VK_DOWN) && y + scaledHeight - 90 <= lowerLimit) {
+            if (keysPressed.contains(KeyEvent.VK_DOWN) && y + scaledHeight - 95 <= lowerLimit) {
                 y += speed;
             }
         } else {
@@ -142,8 +142,7 @@ public class Space_ship {
 
     public void dessiner(Graphics g) {
         g.setColor(Color.GREEN);
-        Rectangle r = bounds();
-        g.drawRect(r.x, r.y, r.width, r.height);
+        ((Graphics2D) g).draw(getPolygon());
 
         Image imageToDraw;
         int width, height;
@@ -171,13 +170,72 @@ public class Space_ship {
         }
     }
 
-    public Rectangle bounds() {
-        int width = vueChangee ? 90 : 70;
-        int height = vueChangee ? 40 : 70;
-        int offsetX = 15;
-        int offsetY = vueChangee ? 10 : 15;
-        return new Rectangle(x + offsetX, y + offsetY, width, height);
+    public Polygon getPolygon() {
+        int width = vueChangee ? 120 : 100;
+        int height = vueChangee ? 60 : 100;
+
+        int drawX = x + transitionOffsetX;
+        int drawY = y + transitionOffsetY;
+
+        int scaledWidth = (int) (width * scale);
+        int scaledHeight = (int) (height * scale);
+
+        int[] xPoints;
+        int[] yPoints;
+
+        if (!vueChangee) {
+            xPoints = new int[] {
+                    drawX + scaledWidth / 2,                      // 0 : sommet (centre)
+                    drawX + 5 * scaledWidth / 8,                  // 1 : pente droite cockpit
+                    drawX + scaledWidth - scaledWidth / 6,        // 2 : aile droite
+                    drawX + 3 * scaledWidth / 4,                  // 3 : bas droit
+                    drawX + scaledWidth / 4,                      // 4 : bas gauche
+                    drawX + scaledWidth / 6,                      // 5 : aile gauche
+                    drawX + 3 * scaledWidth / 8,                  // 6 : pente gauche cockpit
+                    drawX + scaledWidth / 2                       // 7 : retour sommet (ferme le polygon)
+            };
+
+            yPoints = new int[] {
+                    drawY,                                        // 0 : sommet
+                    drawY + scaledHeight / 5,                     // 1 : pente droite cockpit
+                    drawY + scaledHeight / 3,                     // 2 : aile droite
+                    drawY + 9 * scaledHeight / 10,                // 3 : bas droit
+                    drawY + 9 * scaledHeight / 10,                // 4 : bas gauche
+                    drawY + scaledHeight / 3,                     // 5 : aile gauche
+                    drawY + scaledHeight / 5,                     // 6 : pente gauche cockpit
+                    drawY                                         // 7 : (même que 0, ferme la forme)
+            };
+        } else {
+            // VUE CÔTÉ — profil en forme de capsule/fusée
+            xPoints = new int[] {
+                    drawX + scaledWidth / 16,                       // 0 : nez très avant
+                    drawX + scaledWidth / 3,                        // 1 : montée cockpit
+                    drawX + 2 * scaledWidth / 3,                    // 2 : sommet cockpit (reculé)
+                    drawX + 14 * scaledWidth / 16,                  // 3 : haut arrière (va plus loin)
+                    drawX + 15 * scaledWidth / 16,                  // 4 : bord moteur arrière (nouveau point)
+                    drawX + 13 * scaledWidth / 16,                  // 5 : bas arrière
+                    drawX + scaledWidth / 3,                        // 6 : bas cockpit
+                    drawX + scaledWidth / 16                        // 7 : avant bas
+            };
+
+            yPoints = new int[] {
+                    drawY + scaledHeight / 2,                       // 0 : nez
+                    drawY + scaledHeight / 3,                       // 1 : montée cockpit
+                    drawY + scaledHeight / 4,                       // 2 : haut cockpit
+                    drawY + scaledHeight / 3,                       // 3 : haut arrière
+                    drawY + scaledHeight / 2,                       // 4 : extrémité arrière (moteur)
+                    drawY + 2 * scaledHeight / 3,                   // 5 : bas moteur
+                    drawY + 3 * scaledHeight / 4,                   // 6 : bas cockpit
+                    drawY + scaledHeight / 2                        // 7 : avant bas
+            };
+
+        }
+
+        return new Polygon(xPoints, yPoints, xPoints.length);
     }
+
+
+
 
     public int getHeight() {
         return spaceShipFace != null ? spaceShipFace.getHeight(null) : 100; // valeur de secours

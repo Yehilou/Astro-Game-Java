@@ -13,7 +13,8 @@ public class Meteorites {
     private boolean active = false; // Si la météorite est active (visible à l'écran)
     private static final int SCREEN_HEIGHT = 800; // Hauteur de l'écran pour la vue de face
     private BufferedImage image; // Image de la météorite
-    private static BufferedImage meteoriteImage; // Image statique partagée pour toutes les météorites
+    private static BufferedImage meteoriteImage;
+    private Polygon polygon;// Image statique partagée pour toutes les météorites
 
     // Variables pour la rotation de la météorite
     private double angle = 0; // Angle de rotation
@@ -67,8 +68,8 @@ public class Meteorites {
     public void draw(Graphics g) {
 
         g.setColor(Color.YELLOW);
-        Rectangle r = bounds();
-        g.drawRect(r.x, r.y, r.width, r.height);
+        Polygon p = getPolygon();
+        ((Graphics2D) g).draw(p); // Affiche les contours du polygone
         if (active && image != null) {
             Graphics2D g2d = (Graphics2D) g; // Utilise Graphics2D pour plus de contrôles
             AffineTransform oldTransform = g2d.getTransform(); // Sauvegarde l'état initial du graphique
@@ -115,13 +116,13 @@ public class Meteorites {
             }
 
             // Vérification des collisions avec d'autres météorites
-            Rectangle newBounds = new Rectangle(x - 30, y - 30, width + 60, height + 60);
+            Polygon newPoly = getPolygon();
             boolean collision = false;
 
             for (Meteorites other : others) {
                 if (other != this && other.active) { // Ignore cette météorite et vérifie les autres
-                    Rectangle otherBounds = new Rectangle(other.x - 30, other.y - 30, other.width + 60, other.height + 60);
-                    if (newBounds.intersects(otherBounds)) {
+                    Polygon otherPoly = other.getPolygon();
+                    if (newPoly.getBounds().intersects(otherPoly.getBounds())) {
                         collision = true; // Collision détectée
                         break;
                     }
@@ -138,14 +139,7 @@ public class Meteorites {
     }
 
     // Retourne un Rectangle pour la détection de collisions, avec une réduction pour rendre la détection plus précise
-    public Rectangle bounds() {
-        int reducedWidth = (int)(width * 0.75);  // Réduction plus importante
-        int reducedHeight = (int)(height * 0.75);
-        int offsetX = (width - reducedWidth) / 2;
-        int offsetY = (height - reducedHeight) / 2;
-        return new Rectangle(x + offsetX, y + offsetY, reducedWidth, reducedHeight);
 
-    }
 
 
     // Accesseurs et mutateurs pour l'état de la météorite
@@ -176,4 +170,25 @@ public class Meteorites {
     public void setActive(boolean b) {
         this.active = b;
     }
+
+    public Polygon getPolygon() {
+        int sides = 8; // Plus tu augmentes ce nombre, plus c’est proche d’un cercle
+        int[] xPoints = new int[sides];
+        int[] yPoints = new int[sides];
+
+        int centerX = x + width / 2;
+        int centerY = y + height / 2;
+        double scale = 0.9;
+        int radius = (int) (Math.min(width, height) / 2 * scale);
+
+        for (int i = 0; i < sides; i++) {
+            double angleRad = 2 * Math.PI * i / sides;
+            xPoints[i] = centerX + (int) (radius * Math.cos(angleRad));
+            yPoints[i] = centerY + (int) (radius * Math.sin(angleRad));
+        }
+
+        polygon = new Polygon(xPoints, yPoints, sides);
+        return polygon;
+    }
+
 }
