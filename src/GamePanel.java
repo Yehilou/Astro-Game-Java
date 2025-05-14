@@ -37,6 +37,12 @@ public class GamePanel extends JPanel {
     private int itemSpawnCounter = 0;
     private final int spawnDelayFrames = 1800; // 30 sec à 60 FPS
 
+    private TrapShip trapShip = new TrapShip();
+    private long lastTrapSpawn = System.currentTimeMillis();
+    private boolean showTrapWarning = false; // Affiche "!" avant l'arrivée du trap
+    private long trapWarningStartTime = 0;
+
+    private boolean trapShipWarningActive = false;
 
 
 
@@ -171,6 +177,7 @@ public class GamePanel extends JPanel {
 
                         // Met à jour la position du vaisseau
                         spaceShip.updatePosition(this);
+                        spaceShip.isInvulnerable();
 
                         // Appelle la vérification des collisions
                         verifyIfCollision(spaceShip, meteorites);
@@ -190,6 +197,22 @@ public class GamePanel extends JPanel {
                             spawnItem();
                             itemSpawnCounter = 0;
                         }
+
+                        // Gestion du trapShip
+                        long now = System.currentTimeMillis();
+                        if (!trapShip.isActive() && now - lastTrapSpawn >= 60000) {
+                            if (!showTrapWarning) {
+                                showTrapWarning = true;
+                                trapWarningStartTime = now;
+                            } else if (now - trapWarningStartTime >= 2000) {
+                                trapShip.spawn(getWidth(), getHeight(), sideView);
+                                lastTrapSpawn = now;
+                                showTrapWarning = false;
+                            }
+                        } else if (trapShip.isActive()) {
+                            trapShip.update(sideView);
+                        }
+
 
 
 
@@ -242,6 +265,25 @@ public class GamePanel extends JPanel {
         }
         // Dessin du vaisseau
         spaceShip.dessiner(g);
+
+
+        // Affichage du trapShip
+        if (trapShip.isActive()) {
+            trapShip.draw(g);
+        }
+
+        // Affichage de l'avertissement "!" pour trapShip
+        if (showTrapWarning) {
+            Graphics2D g2d = (Graphics2D) g;
+            g2d.setFont(new Font("Arial", Font.BOLD, 60));
+            g2d.setColor(Color.RED);
+            String warning = "!";
+            int strWidth = g2d.getFontMetrics().stringWidth(warning);
+            g2d.drawString(warning, (getWidth() - strWidth) / 2, getHeight() / 2);
+        }
+
+
+
 
         // Affichage de la transition si elle est en cours
         if (inTransition) {
@@ -362,6 +404,19 @@ public class GamePanel extends JPanel {
                 }
             }
 
+            if(trapShip.isActive()){
+
+                Polygon trapHitbox = trapShip.getHitbox();
+                if (shipPolygon.intersects(trapHitbox.getBounds())) {
+                    if (!spaceShip.isInvulnerable()) {
+                        System.out.println("Collision avec TrapShip !");
+                        windowGame.loseLife();
+                        spaceShip.setInvulnerable();
+                    }
+                    trapShip.setActive(false);  // Désactive le TrapShip après collision
+                }
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -430,6 +485,31 @@ public class GamePanel extends JPanel {
             despawnThread.start();
         }
     }
+
+    private void updateTrapShip() {
+        long now = System.currentTimeMillis();
+        long timeSinceLastSpawn = now - lastTrapSpawn;
+
+        // Affiche l'avertissement 2 secondes avant l'apparition
+        if (!trapShip.isActive() && timeSinceLastSpawn > 58_000 && timeSinceLastSpawn < 60_000) {
+            showTrapWarning = true;
+            trapWarningStartTime = now;
+        }
+
+        // Fait apparaître le trapShip après 60 secondes
+        if (!trapShip.isActive() && timeSinceLastSpawn >= 60_000) {
+            trapShip.spawn(getWidth(), getHeight(), sideView); // Méthode spawn à créer dans TrapShip
+            lastTrapSpawn = now;
+            showTrapWarning = false;
+        }
+
+        // Met à jour le vaisseau-piège s'il est actif
+        if (trapShip.isActive()) {
+            trapShip.update(sideView);
+        }
+    }
+
+
 
 
 

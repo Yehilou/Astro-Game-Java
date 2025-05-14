@@ -113,37 +113,45 @@ public class Space_ship {
         // Limite inférieure de Y (475) que tu veux
         int lowerLimit = 475;
 
+
         // Contrôles pour la vue face
         if (!vueChangee) {
-            // Déplacement horizontal
-            if (keysPressed.contains(KeyEvent.VK_LEFT) && x - speed + 2 >= 0)
+            // Horizontal
+            if (keysPressed.contains(KeyEvent.VK_LEFT) && x - speed + 2 >= 0) {
                 x -= speed;
-            if (keysPressed.contains(KeyEvent.VK_RIGHT) && x + speed + scaledWidth <= panelWidth)
+            }
+            if (keysPressed.contains(KeyEvent.VK_RIGHT) && x + speed + scaledWidth <= panelWidth) {
                 x += speed;
+            }
 
-            // Déplacement vertical
-            if (keysPressed.contains(KeyEvent.VK_UP) && y - speed >= panelHeight / 2)
+            // Vertical
+            if (keysPressed.contains(KeyEvent.VK_UP) && y - speed >= 50) {
                 y -= speed;
+            }
 
-            // Limiter le mouvement vers le bas (empêcher de descendre au-delà de 475)
             if (keysPressed.contains(KeyEvent.VK_DOWN) && y + scaledHeight - 95 <= lowerLimit) {
                 y += speed;
             }
+
         } else {
             // Contrôles pour la vue côté
-            if (keysPressed.contains(KeyEvent.VK_LEFT) && x - speed >= panelWidth / 2)
+            if (keysPressed.contains(KeyEvent.VK_LEFT) && x - speed >= panelWidth / 2) {
                 x -= speed;
-            if (keysPressed.contains(KeyEvent.VK_RIGHT) && x + speed + scaledWidth <= panelWidth)
+            }
+
+            if (keysPressed.contains(KeyEvent.VK_RIGHT) && x + speed + scaledWidth <= panelWidth) {
                 x += speed;
+            }
 
-            if (keysPressed.contains(KeyEvent.VK_UP) && y - speed >= 0)
+            if (keysPressed.contains(KeyEvent.VK_UP) && y - speed >= 50) {
                 y -= speed;
+            }
 
-            // Limiter le mouvement vers le bas (empêcher de descendre au-delà de 475)
             if (keysPressed.contains(KeyEvent.VK_DOWN) && y + scaledHeight - 95 <= lowerLimit) {
                 y += speed;
             }
         }
+
 
     }
 
@@ -164,13 +172,17 @@ public class Space_ship {
             long elapsedTime = System.currentTimeMillis() - invulnerableStartTime;
             if (elapsedTime > INVULNERABLE_DURATION) {
                 invulnerable = false;
-                visible = true; // ✅ Re-rendre visible une fois l'invulnérabilité finie
+                visible = true; // ✅ Forcer la visibilité quand invulnérabilité terminée
             } else {
                 // Clignotement toutes les 200 ms
                 long blinkTime = elapsedTime / BLINK_INTERVAL;
                 visible = (blinkTime % 2 == 0);
             }
+        } else {
+            visible = true; // ✅ Ajoute cette ligne pour garantir la visibilité après l'invulnérabilité
         }
+
+
 
         // Dessiner le vaisseau uniquement s'il est visible
         if (visible) {
@@ -282,24 +294,15 @@ public class Space_ship {
 
 
     public void setInvulnerable() {
-        if (invulnerable) return; // ← empêche les appels multiples
         invulnerable = true;
-        System.out.println("→ Vaisseau devenu invulnérable");
-
-        new Thread(() -> {
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            invulnerable = false;
-            System.out.println("→ Vaisseau redevenu vulnérable");
-        }).start();
+        invulnerableStartTime = System.currentTimeMillis();
     }
-
-
 
     public boolean isInvulnerable() {
-        return  invulnerable;
+        if (invulnerable && System.currentTimeMillis() - invulnerableStartTime >= INVULNERABLE_DURATION) {
+            invulnerable = false;
+        }
+        return invulnerable;
     }
+
 }
