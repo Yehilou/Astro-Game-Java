@@ -30,8 +30,16 @@ public class GamePanel extends JPanel {
     // Indicateur si les météorites sont actives
     private boolean gameOver = false;
     private Thread gameThread;
-
     private ArrayList<Explosion> explosions = new ArrayList<>();
+
+
+    private Items currentItem = null;
+    private int itemSpawnCounter = 0;
+    private final int spawnDelayFrames = 1800; // 30 sec à 60 FPS
+
+
+
+
 
     // Méthode pour alterner la vue (de face à côté et vice-versa)
     public void switchView() {
@@ -176,6 +184,14 @@ public class GamePanel extends JPanel {
                         for (Meteorites m : meteorites) {
                             m.update();
                         }
+                        // Gestion de l'apparition des items toutes les 30 secondes
+                        itemSpawnCounter++;
+                        if (itemSpawnCounter >= spawnDelayFrames) {
+                            spawnItem();
+                            itemSpawnCounter = 0;
+                        }
+
+
 
                         repaint(); // Redessine le panneau après la mise à jour
                         try {
@@ -221,8 +237,9 @@ public class GamePanel extends JPanel {
 
         updateExplosions(g);
 
-
-
+        if (currentItem != null && currentItem.isActive()) {
+            currentItem.draw(g);
+        }
         // Dessin du vaisseau
         spaceShip.dessiner(g);
 
@@ -390,9 +407,30 @@ public class GamePanel extends JPanel {
             }
         }
 
-
-
     }
+    private void spawnItem(){
+        if (currentItem == null || !currentItem.isActive()) {
+            String[] itemTypes = {"heart", "laser" , "laser" ,"laser"};
+            int index = (int)(Math.random() * itemTypes.length);
+            String type = itemTypes[index];
+
+            currentItem = new Items(type);
+            currentItem.spawn(getWidth(), getHeight());
+
+            Thread despawnThread = new Thread(() -> {
+                try {
+                    Thread.sleep(5000);
+                    if (currentItem != null && currentItem.isActive()) {
+                        currentItem.deactivate();
+                    }
+                } catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+            });
+            despawnThread.start();
+        }
+    }
+
 
 
 
