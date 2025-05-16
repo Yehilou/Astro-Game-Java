@@ -1,12 +1,14 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
-public class GamePanel extends JPanel {
+public class GamePanel extends JPanel  implements KeyListener {
     public static boolean gameStarted = false; // Indicateur si le jeu a commencé
     private Space_ship spaceShip; // Instance du vaisseau
     private BufferedImage spaceBackground; // Fond de l'espace
@@ -45,6 +47,13 @@ public class GamePanel extends JPanel {
     private boolean trapShipWarningActive = false;
 
 
+    public static boolean canShoot = false;
+    public static long shootStartTime = 0;
+    public static final int SHOOT_DURATION = 5000; // 5 secondes en millisecondes
+
+
+    private LaserManager laserManager = new LaserManager();
+    public ArrayList<MiniLaser> miniLasers = new ArrayList<>();
 
 
     // Méthode pour alterner la vue (de face à côté et vice-versa)
@@ -128,7 +137,10 @@ public class GamePanel extends JPanel {
 
 
         setFocusable(true); // Permet à la fenêtre de recevoir des événements de clavier
-        requestFocusInWindow(); // Demande le focus pour recevoir les événements de clavier
+        addKeyListener(this); // ← ajoute cette ligne
+        requestFocus(); // Demande le focus pour recevoir les événements de clavier
+
+
 
         spaceShip = new Space_ship(frame); // Crée une instance du vaisseau
         spaceShip.spaceShipControl(this); // Active les contrôles pour le vaisseau
@@ -214,7 +226,10 @@ public class GamePanel extends JPanel {
                         }
 
 
-
+                        if (canShoot && System.currentTimeMillis() - shootStartTime > SHOOT_DURATION) {
+                            canShoot = false;
+                        }
+                        laserManager.update();
 
                         repaint(); // Redessine le panneau après la mise à jour
                         try {
@@ -283,8 +298,6 @@ public class GamePanel extends JPanel {
         }
 
 
-
-
         // Affichage de la transition si elle est en cours
         if (inTransition) {
             Graphics2D g2d = (Graphics2D) g;
@@ -301,6 +314,8 @@ public class GamePanel extends JPanel {
             int strWidth = g2d.getFontMetrics().stringWidth(warning);
             g2d.drawString(warning, (getWidth() - strWidth) / 2, 50); // Affiche le message centré
         }
+        Graphics2D g2 = (Graphics2D) g;
+        laserManager.draw(g2);
     }
 
     // Méthode pour faire apparaître des météorites si nécessaire
@@ -343,7 +358,6 @@ public class GamePanel extends JPanel {
 
                     if (shipPolygon.intersects(meteorPolygon.getBounds())) {
                         if (!spaceShip.isInvulnerable()) {
-                            System.out.println("Collision avec météorite !");
                             windowGame.loseLife();
                             spaceShip.setInvulnerable();
                         }
@@ -352,6 +366,36 @@ public class GamePanel extends JPanel {
                     }
                 }
             }
+            if (currentItem != null && currentItem.isActive()) { // entre les items et le vaisseau
+                if (spaceShip.getPolygon().intersects(currentItem.getBounds())) {
+                    currentItem.deactivate();
+                    if (currentItem.getType().equals("heart")){
+                        windowGame.addlife();
+                    } else if (currentItem.getType().equals("laser")) {
+                        canShoot = true;
+                        shootStartTime = System.currentTimeMillis();
+                    }
+                    System.out.println("Objet ramassé : " + currentItem.getType());
+                }
+            }
+            // --- Collision laser / météorite ---
+            for (MiniLaser laser : miniLasers) {
+                Rectangle laserRect = new Rectangle(laser.getX(), laser.getY(), laser.getWidth(), laser.getHeight());
+
+                for (Meteorites m : meteorites) {
+                    if (m.isActive()) {
+                        Polygon meteorPolygon = m.getPolygon();
+
+                        if (laserRect.intersects(meteorPolygon.getBounds())) {
+                                System.out.println("Collision sa meeeeeere !");
+                                m.setActive(false);
+                                laser.setActive(false);
+                                break;
+                        }
+                    }
+                }
+            }
+
 
             // --- Collision météorite / météorite ---
             for (int i = 0; i < meteorites.length; i++) {
@@ -465,24 +509,13 @@ public class GamePanel extends JPanel {
     }
     private void spawnItem(){
         if (currentItem == null || !currentItem.isActive()) {
-            String[] itemTypes = {"heart", "laser" , "laser" ,"laser"};
+            String[] itemTypes = { "laser" , "laser" , "laser"};
             int index = (int)(Math.random() * itemTypes.length);
             String type = itemTypes[index];
 
             currentItem = new Items(type);
             currentItem.spawn(getWidth(), getHeight());
 
-            Thread despawnThread = new Thread(() -> {
-                try {
-                    Thread.sleep(5000);
-                    if (currentItem != null && currentItem.isActive()) {
-                        currentItem.deactivate();
-                    }
-                } catch (InterruptedException e){
-                    e.printStackTrace();
-                }
-            });
-            despawnThread.start();
         }
     }
 
@@ -509,6 +542,23 @@ public class GamePanel extends JPanel {
         }
     }
 
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+            int laserX = spaceShip.getX() + spaceShip.getWidth() /2;
+            int laserY = spaceShip.getY();
+            laserManager.shoot(laserX, laserY , sideView);
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+        }
+    }
+    public void keyTyped(KeyEvent e) {
+        // On ne l'utilise pas, mais on doit l’implémenter
+    }
 
 
 

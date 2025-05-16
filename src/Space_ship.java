@@ -305,4 +305,16 @@ public class Space_ship {
         return invulnerable;
     }
 
+    public int getX() {
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+    public int getWidth() {
+        int width = vueChangee ? 120 : 100;
+        return (int) (width * scale);
+    }
+
 }

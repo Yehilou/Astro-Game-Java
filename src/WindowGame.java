@@ -151,6 +151,11 @@ public class WindowGame extends JFrame {
         return gamePanel;
     }
 
+    public void addlife(){ // pour rajoute une vie
+        lives++;
+        updateLivesDisplay();
+    }
+
     public void loseLife() {
         music.playOnce("src/resources/sounds/lostlife.wav");
         lives--;

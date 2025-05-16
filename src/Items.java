@@ -13,6 +13,7 @@ public class Items {
     private boolean visible;
 
 
+
     public Items(String type) {
         this.type = type;
         this.active = false;
@@ -44,19 +45,29 @@ public class Items {
     }
 
     public void spawn(int panelWidth, int panelHeight) {
-        this.x = (int)(Math.random() * (panelWidth - width));
+        int minX = panelWidth / 10;
+        int maxX = panelWidth - width - panelWidth / 10;
+
         int minY = panelHeight / 4;
-        int maxY = panelHeight - height;
+        int maxY = panelHeight - height - panelHeight / 4;
+
+        this.x = minX + (int)(Math.random() * (maxX - minX));
         this.y = minY + (int)(Math.random() * (maxY - minY));
         this.active = true;
+        this.visible = false;
 
+        // Thread pour clignotement
         new Thread(() -> {
             try {
-                for (int i = 0; i < 5; i++) { // 5 clignotements (200ms)
+                for (int i = 0; i < 6; i++) {
                     visible = !visible;
-                    Thread.sleep(100);
+                    Thread.sleep(150); // clignote plus vite
                 }
-                visible = true; // visible en continu après le clignotement
+                visible = true;
+
+                // Thread pour disparition après 10s
+                Thread.sleep(5000);
+                deactivate();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
