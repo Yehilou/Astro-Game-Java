@@ -115,44 +115,21 @@ public class Space_ship {
 
 
         // Contrôles pour la vue face
-        if (!vueChangee) {
-            // Horizontal
-            if (keysPressed.contains(KeyEvent.VK_LEFT) && x - speed + 2 >= 0) {
-                x -= speed;
-            }
-            if (keysPressed.contains(KeyEvent.VK_RIGHT) && x + speed + scaledWidth <= panelWidth) {
-                x += speed;
-            }
-
-            // Vertical
-            if (keysPressed.contains(KeyEvent.VK_UP) && y - speed >= 50) {
-                y -= speed;
-            }
-
-            if (keysPressed.contains(KeyEvent.VK_DOWN) && y + scaledHeight - 95 <= lowerLimit) {
-                y += speed;
-            }
-
-        } else {
-            // Contrôles pour la vue côté
-            if (keysPressed.contains(KeyEvent.VK_LEFT) && x - speed >= panelWidth / 2) {
-                x -= speed;
-            }
-
-            if (keysPressed.contains(KeyEvent.VK_RIGHT) && x + speed + scaledWidth <= panelWidth) {
-                x += speed;
-            }
-
-            if (keysPressed.contains(KeyEvent.VK_UP) && y - speed >= 50) {
-                y -= speed;
-            }
-
-            if (keysPressed.contains(KeyEvent.VK_DOWN) && y + scaledHeight - 95 <= lowerLimit) {
-                y += speed;
-            }
+        if (keysPressed.contains(KeyEvent.VK_LEFT) && x - speed + 2 >= 0) {
+            x -= speed;
+        }
+        if (keysPressed.contains(KeyEvent.VK_RIGHT) && x + speed + scaledWidth <= panelWidth) {
+            x += speed;
         }
 
+        // Vertical
+        if (keysPressed.contains(KeyEvent.VK_UP) && y - speed >= 50) {
+            y -= speed;
+        }
 
+        if (keysPressed.contains(KeyEvent.VK_DOWN) && y + scaledHeight - 95 <= lowerLimit) {
+            y += speed;
+        }
     }
 
     private void repositionIfOutOfZone() {
@@ -212,11 +189,7 @@ public class Space_ship {
             }
         }
 
-        // Dessiner les limites du vaisseau si visible ou invulnérable (debug)
-        if (visible || invulnerable) {
-            g.setColor(Color.GREEN);
-            ((Graphics2D) g).draw(getPolygon());
-        }
+
     }
 
 

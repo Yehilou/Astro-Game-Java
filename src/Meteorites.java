@@ -67,9 +67,8 @@ public class Meteorites {
     // Dessine la météorite avec rotation
     public void draw(Graphics g) {
 
-        g.setColor(Color.YELLOW);
+
         Polygon p = getPolygon();
-        ((Graphics2D) g).draw(p); // Affiche les contours du polygone
         if (active && image != null) {
             Graphics2D g2d = (Graphics2D) g; // Utilise Graphics2D pour plus de contrôles
             AffineTransform oldTransform = g2d.getTransform(); // Sauvegarde l'état initial du graphique

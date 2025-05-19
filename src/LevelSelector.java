@@ -85,7 +85,7 @@ public class LevelSelector extends JFrame {
             } else if (levelName.equalsIgnoreCase("level 3")) {
                 speed = 3;
                 duration = 240;
-                lives = 3;
+                lives = 4000;
             }
 
             new WindowGame(speed, duration , lives);

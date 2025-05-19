@@ -141,7 +141,6 @@ public class GamePanel extends JPanel  implements KeyListener {
         requestFocus(); // Demande le focus pour recevoir les événements de clavier
 
 
-
         spaceShip = new Space_ship(frame); // Crée une instance du vaisseau
         spaceShip.spaceShipControl(this); // Active les contrôles pour le vaisseau
 
@@ -157,96 +156,93 @@ public class GamePanel extends JPanel  implements KeyListener {
             meteorites[i] = new Meteorites();
         }
 
-        // Initialise un Timer pour vérifier si le panneau est prêt
-        // Initialise un Timer pour vérifier si le panneau est prêt
-        Timer initTimer = new Timer(50, e -> {
-            if (getWidth() > 0 && getHeight() > 0 && spaceBackground != null && !initialized) {
-                initialized = true;
+        gameThread = new Thread(() -> {
+            while (!Thread.currentThread().isInterrupted()) {
+                if (getWidth() > 0 && getHeight() > 0 && spaceBackground != null && !initialized) {
+                    initialized = true;
 
-                y1 = 0;
-                y2 = -getHeight();
-                x1 = 0;
-                x2 = -getWidth();
+                    y1 = 0;
+                    y2 = -getHeight();
+                    x1 = 0;
+                    x2 = -getWidth();
+                }
 
-                // Crée et démarre un thread pour gérer les mises à jour du jeu
-                gameThread = new Thread(() -> {
-                    if(gameOver){
-                        return;
+                if (!initialized || gameOver) {
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        break;
                     }
-                    while (!Thread.currentThread().isInterrupted()) {
-                        // Mise à jour des positions du fond
-                        if (sideView) {
-                            x1 += scrollSpeed;
-                            x2 += scrollSpeed;
-                            if (x1 >= getWidth()) x1 = x2 - getWidth();
-                            if (x2 >= getWidth()) x2 = x1 - getWidth();
-                        } else {
-                            y1 += scrollSpeed;
-                            y2 += scrollSpeed;
-                            if (y1 >= getHeight()) y1 = y2 - getHeight();
-                            if (y2 >= getHeight()) y2 = y1 - getHeight();
-                        }
+                    continue;
+                }
 
-                        // Met à jour la position du vaisseau
-                        spaceShip.updatePosition(this);
-                        spaceShip.isInvulnerable();
+                if (sideView) {
+                    x1 += scrollSpeed;
+                    x2 += scrollSpeed;
+                    if (x1 >= getWidth()) x1 = x2 - getWidth();
+                    if (x2 >= getWidth()) x2 = x1 - getWidth();
+                } else {
+                    y1 += scrollSpeed;
+                    y2 += scrollSpeed;
+                    if (y1 >= getHeight()) y1 = y2 - getHeight();
+                    if (y2 >= getHeight()) y2 = y1 - getHeight();
+                }
 
-                        // Appelle la vérification des collisions
-                        verifyIfCollision(spaceShip, meteorites);
+                spaceShip.updatePosition(this);
+                spaceShip.isInvulnerable();
+                verifyIfCollision(spaceShip, meteorites);
 
-                        frameCounter++;
-                        if (meteoritesActive && frameCounter % 60 == 0) {
-                            spawnMeteorites();
-                        }
+                frameCounter++;
+                if (meteoritesActive && frameCounter % 60 == 0) {
+                    spawnMeteorites();
+                }
 
-                        // Met à jour les météorites et vérifie les collisions pour chaque météorite
-                        for (Meteorites m : meteorites) {
-                            m.update();
-                        }
-                        // Gestion de l'apparition des items toutes les 30 secondes
-                        itemSpawnCounter++;
-                        if (itemSpawnCounter >= spawnDelayFrames) {
-                            spawnItem();
-                            itemSpawnCounter = 0;
-                        }
+                for (Meteorites m : meteorites) {
+                    m.update();
+                }
 
-                        // Gestion du trapShip
-                        long now = System.currentTimeMillis();
-                        if (!trapShip.isActive() && now - lastTrapSpawn >= 60000) {
-                            if (!showTrapWarning) {
-                                showTrapWarning = true;
-                                trapWarningStartTime = now;
-                            } else if (now - trapWarningStartTime >= 2000) {
-                                trapShip.spawn(getWidth(), getHeight(), sideView);
-                                lastTrapSpawn = now;
-                                showTrapWarning = false;
-                            }
-                        } else if (trapShip.isActive()) {
-                            trapShip.update(sideView);
-                        }
+                itemSpawnCounter++;
+                if (itemSpawnCounter >= spawnDelayFrames) {
+                    spawnItem();
+                    itemSpawnCounter = 0;
+                }
 
-
-                        if (canShoot && System.currentTimeMillis() - shootStartTime > SHOOT_DURATION) {
-                            canShoot = false;
-                        }
-                        laserManager.update();
-
-                        repaint(); // Redessine le panneau après la mise à jour
-                        try {
-                            Thread.sleep(16); // Petit délai pour rendre l'animation fluide
-                        } catch (InterruptedException ex) {
-                            Thread.currentThread().interrupt(); // Bonne pratique pour gérer l'interruption
-                        }
+                long now = System.currentTimeMillis();
+                if (!trapShip.isActive() && now - lastTrapSpawn >= 60000) {
+                    if (!showTrapWarning) {
+                        showTrapWarning = true;
+                        trapWarningStartTime = now;
+                    } else if (now - trapWarningStartTime >= 2000) {
+                        trapShip.spawn(getWidth(), getHeight(), sideView);
+                        lastTrapSpawn = now;
+                        showTrapWarning = false;
                     }
-                });
-                gameThread.start(); // Démarre le thread
+                } else if (trapShip.isActive()) {
+                    trapShip.update(sideView);
+                }
 
-                // Planifie le premier changement de vue après un délai aléatoire
-                int firstDelay = 60_000 + (int)(Math.random() * 120_000);
-                new Timer(firstDelay, e2 -> switchView()).start();
+                if (canShoot && System.currentTimeMillis() - shootStartTime > SHOOT_DURATION) {
+                    canShoot = false;
+                }
+
+                laserManager.update();
+                repaint();
+
+                try {
+                    Thread.sleep(16);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
             }
         });
-        initTimer.start(); // Démarre le Timer pour initialiser le jeu
+
+        gameThread.start();
+
+        switchView();
+        scheduleNextViewChange();
+        System.out.println("244 enlever switch view");
 
     }
 
@@ -375,7 +371,7 @@ public class GamePanel extends JPanel  implements KeyListener {
                         canShoot = true;
                         shootStartTime = System.currentTimeMillis();
                     }
-                    System.out.println("Objet ramassé : " + currentItem.getType());
+
                 }
             }
             // --- Collision laser / météorite ---
@@ -399,7 +395,6 @@ public class GamePanel extends JPanel  implements KeyListener {
                     intersection.intersect(meteorArea);
 
                     if (!intersection.isEmpty()) {
-                        System.out.println("✅ Collision laser / météorite détectée !");
                         m.setActive(false);
                         laser.setActive(false);
                         break;
@@ -452,7 +447,6 @@ public class GamePanel extends JPanel  implements KeyListener {
 
                     if (explosionRect.intersects(shipPolygon.getBounds())) {
                         if (!spaceShip.isInvulnerable()) {
-                            System.out.println("Collision avec explosion !");
                             windowGame.loseLife();
                             spaceShip.setInvulnerable();
                         }
@@ -466,7 +460,6 @@ public class GamePanel extends JPanel  implements KeyListener {
                 Polygon trapHitbox = trapShip.getHitbox();
                 if (shipPolygon.intersects(trapHitbox.getBounds())) {
                     if (!spaceShip.isInvulnerable()) {
-                        System.out.println("Collision avec TrapShip !");
                         windowGame.loseLife();
                         spaceShip.setInvulnerable();
                     }
@@ -509,13 +502,8 @@ public class GamePanel extends JPanel  implements KeyListener {
         }
 
         for(Explosion explosion : explosions){
-            if(explosion.isActive()){
+            if(explosion.isActive()) {
                 explosion.draw(g);
-
-            // Affiche la hitbox circulaire en rouge
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setColor(Color.RED);
-                g2d.draw(explosion.getHitbox());
             }
         }
 
