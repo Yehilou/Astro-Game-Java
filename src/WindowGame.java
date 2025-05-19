@@ -149,10 +149,6 @@ public class WindowGame extends JFrame {
         });
     }
 
-    public JPanel getGamePanel() {
-        return gamePanel;
-    }
-
     public void addlife(){ // pour rajoute une vie
         lives++;
         updateLivesDisplay();

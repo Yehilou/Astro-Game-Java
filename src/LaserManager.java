@@ -4,7 +4,7 @@ import java.util.ArrayList;
 public class LaserManager {
     private ArrayList<MiniLaser> lasers = new ArrayList<>();
     private long lastShootTime = 0; // Temps du dernier tir
-    private final long shootCooldown = 900;
+    private final long shootCooldown = 500;
     private Music music =  new Music();
 
     public void shoot(int x, int y , boolean sideview) {
