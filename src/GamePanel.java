@@ -306,7 +306,7 @@ public class GamePanel extends JPanel  implements KeyListener {
             Graphics2D g2d = (Graphics2D) g;
             g2d.setFont(new Font("Arial", Font.BOLD, 30)); // Définition de la police
             g2d.setColor(Color.RED); // Couleur de l'avertissement
-            String warning = "⚠ View change imminent ⚠"; // Message d'avertissement
+            String warning = "⚠ View change soon ⚠"; // Message d'avertissement
             int strWidth = g2d.getFontMetrics().stringWidth(warning);
             g2d.drawString(warning, (getWidth() - strWidth) / 2, 50); // Affiche le message centré
         }
@@ -472,12 +472,6 @@ public class GamePanel extends JPanel  implements KeyListener {
         }
     }
 
-
-
-    public void gameOver() {
-        gameOver = true;  // Marque le jeu comme terminé
-        // Ici, tu peux ajouter des actions supplémentaires, comme afficher "Game Over"
-    }
 
     public void stopGameThread() {
         if (gameThread != null && gameThread.isAlive()) {

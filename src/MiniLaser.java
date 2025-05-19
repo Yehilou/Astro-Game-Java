@@ -3,14 +3,14 @@ import java.awt.*;
 public class MiniLaser {
     private int x, y;
     private final int speed = 10;
-    private final int width = 4, height = 12;
+    private int width = 4, height = 12;
     private boolean active = true;
     private boolean sideview;
 
     public MiniLaser(int x, int y ,  boolean sideview) {
         this.x = x;
         this.y = y;
-        this.sideview = sideview;
+        setSideView(sideview);
     }
 
     public void update() {
@@ -43,6 +43,13 @@ public class MiniLaser {
         this.active = active;
     }
     public void setSideView(boolean sideView) {
-        this.sideview = sideView; // Permet de changer la direction même après création
+        this.sideview = sideView;
+        if (sideView) {
+            width = 12;
+            height = 4;
+        } else {
+            width = 4;
+            height = 12;
+        }
     }
 }
