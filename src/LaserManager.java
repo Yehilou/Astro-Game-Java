@@ -3,15 +3,16 @@ import java.util.ArrayList;
 
 public class LaserManager {
     private ArrayList<MiniLaser> lasers = new ArrayList<>();
-
     private long lastShootTime = 0; // Temps du dernier tir
-    private final long shootCooldown = 1000; // 1000 ms = 1 seconde
+    private final long shootCooldown = 900;
+    private Music music =  new Music();
 
     public void shoot(int x, int y , boolean sideview) {
         if (GamePanel.canShoot) {
             long currentTime = System.currentTimeMillis();
             if (currentTime - lastShootTime >= shootCooldown) {
-                lasers.add(new MiniLaser(x, y , sideview));
+                music.playOnce("src/resources/sounds/laserMusic.wav");
+                lasers.add(new MiniLaser(x, y, sideview));
                 lastShootTime = currentTime; // Met à jour le dernier tir
             }
         }

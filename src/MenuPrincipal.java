@@ -1,13 +1,9 @@
-import javax.sound.sampled.*;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.io.File;
-import java.io.IOException;
 
 public class MenuPrincipal extends JFrame {
 
-    private Clip clip;
+    private Music music = new Music();
 
     public MenuPrincipal() {
         setTitle("space Game - Menu");
@@ -16,18 +12,9 @@ public class MenuPrincipal extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
 
-
-        try {
-            File audioFile = new File("src/resources/sounds/lobyMusic.wav");
-            AudioInputStream audioStream = AudioSystem.getAudioInputStream(audioFile);
-            clip = AudioSystem.getClip();
-            clip.open(audioStream);
-            clip.loop(Clip.LOOP_CONTINUOUSLY);
-            clip.start();
-        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-            e.printStackTrace();
-        }
-
+        // Définir un volume doux pour la musique du menu
+        music.setLoopVolume(-15.0f);  // Plus doux
+        music.playLoop("src/resources/sounds/lobyMusic.wav");
 
         JPanel backroundPanel = new JPanel() {
             private ImageIcon background = new ImageIcon("src/resources/images/Space/SpaceBackground.gif");
@@ -36,7 +23,6 @@ public class MenuPrincipal extends JFrame {
                 super.paintComponent(g);
                 g.drawImage(background.getImage(), 0, 0, this);
             }
-
         };
         backroundPanel.setLayout(null);
         setContentPane(backroundPanel);
@@ -55,7 +41,6 @@ public class MenuPrincipal extends JFrame {
                 int x = (getWidth() - fm.stringWidth(text)) / 2;
                 int y = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
 
-
                 g2d.setColor(Color.WHITE);
                 for (int i = 0; i < 9; i++) {
                     int dx = (i % 3) - 1;
@@ -65,73 +50,47 @@ public class MenuPrincipal extends JFrame {
                     }
                 }
 
-
                 g2d.setColor(new Color(0, 0, 130));
                 g2d.drawString(text, x, y);
             }
         };
-
         titleLabel.setBounds(-20, 25, 800, 150);
         backroundPanel.add(titleLabel);
 
-
-
-
         JButton rulesButton = new JButton("Rules");
         rulesButton.setBounds(281, 280, 200, 60);
-        rulesButton.setFont(new Font("Arial", Font.BOLD, 20));
-        rulesButton.setBackground(new Color(0, 0, 130));
-        rulesButton.setForeground(Color.WHITE);
-        rulesButton.setFocusPainted(false);
-        rulesButton.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2, true));
-        rulesButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        rulesButton.setOpaque(true);
+        styleButton(rulesButton);
         rulesButton.addActionListener(e -> new RulesWindow());
         backroundPanel.add(rulesButton);
-        setContentPane(backroundPanel);
-
-
-
 
         JButton playButton = new JButton("Play");
         playButton.setBounds(281, 210, 200, 60);
-
-        playButton.setFont(new Font("Arial", Font.BOLD, 20));
-        playButton.setBackground(new Color(0, 0, 130));
-        playButton.setForeground(Color.WHITE);
-        playButton.setFocusPainted(false);
-        playButton.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2, true));
-        playButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        playButton.setOpaque(true);
-
+        styleButton(playButton);
         playButton.addActionListener(e -> {
             this.setVisible(false);
+            music.stop(); // On arrête la musique du menu
             new LevelSelector(this);
         });
         backroundPanel.add(playButton);
 
-
-
         JButton exitButton = new JButton("Log Out");
-        exitButton.setBounds(281,350,200,60);
-        exitButton.setFont(new Font("Arial" , Font.BOLD , 20));
-        exitButton.setBackground(new Color(0,0,130));
-        exitButton.setForeground(Color.WHITE);
-        exitButton.setFocusPainted(false);
-        exitButton.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2, true));
-        exitButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        rulesButton.setOpaque(true);
-        exitButton.addActionListener(e -> {
-            System.exit(0);
-        });
+        exitButton.setBounds(281, 350, 200, 60);
+        styleButton(exitButton);
+        exitButton.addActionListener(e -> System.exit(0));
         backroundPanel.add(exitButton);
-
     }
+
+    private void styleButton(JButton button) {
+        button.setFont(new Font("Arial", Font.BOLD, 20));
+        button.setBackground(new Color(0, 0, 130));
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2, true));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setOpaque(true);
+    }
+
     public void stopMusic() {
-        if (clip != null && clip.isRunning()) {
-            clip.stop();
-        }
+        music.stop();
     }
 }
-
-

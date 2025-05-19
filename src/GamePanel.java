@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import javax.imageio.ImageIO;
+import java.awt.geom.Area;
+
 
 public class GamePanel extends JPanel  implements KeyListener {
     public static boolean gameStarted = false; // Indicateur si le jeu a commencé
@@ -43,9 +45,7 @@ public class GamePanel extends JPanel  implements KeyListener {
     private long lastTrapSpawn = System.currentTimeMillis();
     private boolean showTrapWarning = false; // Affiche "!" avant l'arrivée du trap
     private long trapWarningStartTime = 0;
-
     private boolean trapShipWarningActive = false;
-
 
     public static boolean canShoot = false;
     public static long shootStartTime = 0;
@@ -379,22 +379,35 @@ public class GamePanel extends JPanel  implements KeyListener {
                 }
             }
             // --- Collision laser / météorite ---
-            for (MiniLaser laser : miniLasers) {
+            for (MiniLaser laser : laserManager.getLasers()) {
+                if (!laser.isActive()) continue; // Ignore les lasers inactifs
+
                 Rectangle laserRect = new Rectangle(laser.getX(), laser.getY(), laser.getWidth(), laser.getHeight());
+                Area laserArea = new Area(laserRect);
 
                 for (Meteorites m : meteorites) {
-                    if (m.isActive()) {
-                        Polygon meteorPolygon = m.getPolygon();
+                    if (!m.isActive()) continue;
 
-                        if (laserRect.intersects(meteorPolygon.getBounds())) {
-                                System.out.println("Collision sa meeeeeere !");
-                                m.setActive(false);
-                                laser.setActive(false);
-                                break;
-                        }
+                    Polygon meteorPolygon = m.getPolygon();
+                    Area meteorArea = new Area(meteorPolygon);
+
+                    // Infos debug sur la météorite (via le bounding box du polygone)
+                    Rectangle meteorBounds = meteorPolygon.getBounds();
+
+                    // Test d'intersection précis
+                    Area intersection = new Area(laserArea);
+                    intersection.intersect(meteorArea);
+
+                    if (!intersection.isEmpty()) {
+                        System.out.println("✅ Collision laser / météorite détectée !");
+                        m.setActive(false);
+                        laser.setActive(false);
+                        break;
                     }
                 }
             }
+
+
 
 
             // --- Collision météorite / météorite ---
@@ -509,13 +522,11 @@ public class GamePanel extends JPanel  implements KeyListener {
     }
     private void spawnItem(){
         if (currentItem == null || !currentItem.isActive()) {
-            String[] itemTypes = { "laser" , "laser" , "laser"};
+            String[] itemTypes = { "laser" , "laser" , "heart" , "laser"};
             int index = (int)(Math.random() * itemTypes.length);
             String type = itemTypes[index];
-
             currentItem = new Items(type);
             currentItem.spawn(getWidth(), getHeight());
-
         }
     }
 
@@ -559,9 +570,6 @@ public class GamePanel extends JPanel  implements KeyListener {
     public void keyTyped(KeyEvent e) {
         // On ne l'utilise pas, mais on doit l’implémenter
     }
-
-
-
 
 
 }

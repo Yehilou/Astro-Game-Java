@@ -10,7 +10,7 @@ public class WindowGame extends JFrame {
     private boolean gameStarted = false;
     private boolean inCountdown = true;
     private boolean menuAlreadyOpened = false; // ✅ Nouveau flag
-    private Music music;
+    private Music music =  new Music();
     private JPanel gamePanel;
     private int lives;
     private JPanel livesPanel;
@@ -56,6 +56,7 @@ public class WindowGame extends JFrame {
         backButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         backButton.addActionListener(e -> {
             music.stop();
+            ((GamePanel) gamePanel).stopGameThread(); // stoppe proprement le thread
             dispose();
             new MenuPrincipal().setVisible(true);
         });
@@ -104,6 +105,7 @@ public class WindowGame extends JFrame {
                     inCountdown = false;
                     gameStarted = true;
                     music.stop();
+                    music.setLoopVolume(-15.0f);
                     music.playLoop("src/resources/sounds/battleMusic.wav");
                     startGameTimer();
                 });
