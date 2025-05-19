@@ -92,7 +92,7 @@ public class GamePanel extends JPanel  implements KeyListener {
             }
 
             sideView = switchToSideView; // Change effectivement la vue
-            spaceShip.setVueChangee(sideView); // Applique la nouvelle vue au vaisseau
+            spaceShip.setVueChange(sideView); // Applique la nouvelle vue au vaisseau
 
             // Configure les positions du fond en fonction de la vue (face ou côté)
             if (sideView) {
@@ -125,8 +125,8 @@ public class GamePanel extends JPanel  implements KeyListener {
 
     // Méthode pour planifier le prochain changement de vue après un délai aléatoire
     private void scheduleNextViewChange() {
-        int minDelay = 2 * 60 * 1000; // Délai minimum entre les changements (2 minutes)
-        int maxDelay = 3 * 60 * 1000; // Délai maximum entre les changements (3 minutes)
+        int minDelay = 1 * 60 * 1000; // Délai minimum entre les changements (2 minutes)
+        int maxDelay = 2 * 60 * 1000; // Délai maximum entre les changements (3 minutes)
         int delay = minDelay + (int)(Math.random() * (maxDelay - minDelay)); // Délai aléatoire
         new Timer(delay, e -> switchView()).start(); // Lance un Timer pour le prochain changement de vue
     }
@@ -240,10 +240,8 @@ public class GamePanel extends JPanel  implements KeyListener {
 
         gameThread.start();
 
-        switchView();
         scheduleNextViewChange();
-        System.out.println("244 enlever switch view");
-
+        System.out.println("suce ma teub");
     }
 
     // Méthode pour dessiner les éléments du jeu sur l'écran
@@ -504,7 +502,7 @@ public class GamePanel extends JPanel  implements KeyListener {
     }
     private void spawnItem(){
         if (currentItem == null || !currentItem.isActive()) {
-            String[] itemTypes = { "laser" , "laser" , "heart" , "laser"};
+            String[] itemTypes = { "laser" , "laser" , "laser"};
             int index = (int)(Math.random() * itemTypes.length);
             String type = itemTypes[index];
             currentItem = new Items(type);
@@ -538,8 +536,15 @@ public class GamePanel extends JPanel  implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            int laserX = spaceShip.getX() + spaceShip.getWidth() /2;
-            int laserY = spaceShip.getY();
+            int laserX ,  laserY;
+            if (sideView) {
+                 laserX = spaceShip.getX() + spaceShip.getWidth() / 2  -50;
+                 laserY = spaceShip.getY() + 28;
+            }
+            else {
+                laserX = spaceShip.getX() + spaceShip.getWidth() / 2;
+                laserY = spaceShip.getY() ;
+            }
             laserManager.shoot(laserX, laserY , sideView);
         }
     }

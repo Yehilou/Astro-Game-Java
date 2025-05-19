@@ -40,7 +40,7 @@ public class Space_ship {
         }
     }
 
-    public void setVueChangee(boolean v) {
+    public void setVueChange(boolean v) {
         vueChangee = v;
         repositionIfOutOfZone();
     }
