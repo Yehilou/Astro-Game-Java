@@ -510,7 +510,7 @@ public class GamePanel extends JPanel  implements KeyListener {
     }
     private void spawnItem(){
         if (currentItem == null || !currentItem.isActive()) {
-            String[] itemTypes = {"laser","laser","laser"};
+            String[] itemTypes = {"laser","laser","laser","heart"};
             int index = (int)(Math.random() * itemTypes.length);
             String type = itemTypes[index];
             currentItem = new Items(type);
