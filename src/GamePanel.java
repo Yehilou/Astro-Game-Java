@@ -39,7 +39,7 @@ public class GamePanel extends JPanel  implements KeyListener {
 
     private Items currentItem = null;
     private int itemSpawnCounter = 0;
-    private final int spawnDelayFrames = 1800; // 30 sec à 60 FPS
+    private final int spawnDelayFrames = 1260; // 21 sec à 60 FPS
 
     private TrapShip trapShip = new TrapShip();
     private long lastTrapSpawn = System.currentTimeMillis();
@@ -54,7 +54,8 @@ public class GamePanel extends JPanel  implements KeyListener {
 
     private LaserManager laserManager = new LaserManager();
     public ArrayList<MiniLaser> miniLasers = new ArrayList<>();
-
+    private Music music = new Music();
+    private boolean trapSoundPlayed = false;
 
     // Méthode pour alterner la vue (de face à côté et vice-versa)
     public void switchView() {
@@ -209,7 +210,7 @@ public class GamePanel extends JPanel  implements KeyListener {
                 }
 
                 long now = System.currentTimeMillis();
-                if (!trapShip.isActive() && now - lastTrapSpawn >= 60000) {
+                if (!trapShip.isActive() && now - lastTrapSpawn >= 30000) {
                     if (!showTrapWarning) {
                         showTrapWarning = true;
                         trapWarningStartTime = now;
@@ -241,7 +242,6 @@ public class GamePanel extends JPanel  implements KeyListener {
         gameThread.start();
 
         scheduleNextViewChange();
-        System.out.println("suce ma teub");
     }
 
     // Méthode pour dessiner les éléments du jeu sur l'écran
@@ -283,12 +283,20 @@ public class GamePanel extends JPanel  implements KeyListener {
 
         // Affichage de l'avertissement "!" pour trapShip
         if (showTrapWarning) {
+            if (!trapSoundPlayed) {
+                music.playOnce("src/resources/sounds/alarm.wav");
+                music.playOnce("src/resources/sounds/vinderbus.wav");
+                trapSoundPlayed = true;
+            }
             Graphics2D g2d = (Graphics2D) g;
             g2d.setFont(new Font("Arial", Font.BOLD, 60));
             g2d.setColor(Color.RED);
             String warning = "!";
             int strWidth = g2d.getFontMetrics().stringWidth(warning);
             g2d.drawString(warning, (getWidth() - strWidth) / 2, getHeight() / 2);
+        } else {
+            // Réinitialise si l'alerte est finie
+            trapSoundPlayed = false;
         }
 
 
@@ -373,7 +381,8 @@ public class GamePanel extends JPanel  implements KeyListener {
                 }
             }
             // --- Collision laser / météorite ---
-            for (MiniLaser laser : laserManager.getLasers()) {
+            for (int i = 0; i < laserManager.getLasers().size(); i++) {
+                MiniLaser laser = laserManager.getLasers().get(i);
                 if (!laser.isActive()) continue; // Ignore les lasers inactifs
 
                 Rectangle laserRect = new Rectangle(laser.getX(), laser.getY(), laser.getWidth(), laser.getHeight());
@@ -385,9 +394,6 @@ public class GamePanel extends JPanel  implements KeyListener {
                     Polygon meteorPolygon = m.getPolygon();
                     Area meteorArea = new Area(meteorPolygon);
 
-                    // Infos debug sur la météorite (via le bounding box du polygone)
-                    Rectangle meteorBounds = meteorPolygon.getBounds();
-
                     // Test d'intersection précis
                     Area intersection = new Area(laserArea);
                     intersection.intersect(meteorArea);
@@ -395,10 +401,12 @@ public class GamePanel extends JPanel  implements KeyListener {
                     if (!intersection.isEmpty()) {
                         m.setActive(false);
                         laser.setActive(false);
+                        music.playOnce("src/resources/sounds/explosion.wav");
                         break;
                     }
                 }
             }
+
 
 
 
@@ -427,7 +435,7 @@ public class GamePanel extends JPanel  implements KeyListener {
                         int explosionY = centerY - explosionHeight / 2;
 
                         createExplosion(explosionX, explosionY, explosionWidth, explosionHeight);
-
+                        music.playOnce("src/resources/sounds/explosion.wav");
                         break;
                     }
                 }
@@ -502,11 +510,12 @@ public class GamePanel extends JPanel  implements KeyListener {
     }
     private void spawnItem(){
         if (currentItem == null || !currentItem.isActive()) {
-            String[] itemTypes = { "laser" , "laser" , "laser"};
+            String[] itemTypes = {"laser","laser","laser"};
             int index = (int)(Math.random() * itemTypes.length);
             String type = itemTypes[index];
             currentItem = new Items(type);
             currentItem.spawn(getWidth(), getHeight());
+            music.playOnce("src/resources/sounds/itemSpawn.wav");
         }
     }
 

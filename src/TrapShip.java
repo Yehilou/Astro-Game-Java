@@ -11,7 +11,6 @@ public class TrapShip {
     private boolean active = false;
     private int speed = 40;
     private long spawnTime;
-
     // Déclaration de la hitbox comme un Polygon
     private Polygon hitbox;
 

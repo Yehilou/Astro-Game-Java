@@ -21,7 +21,7 @@ public class LaserManager {
     public void update() {
         for (int i = 0; i < lasers.size(); i++) {
             lasers.get(i).update();
-            if (lasers.get(i).isOffScreen()) {
+            if (lasers.get(i).isOffScreen() || !lasers.get(i).isActive()) {
                 lasers.remove(i);
                 i--;
             }
