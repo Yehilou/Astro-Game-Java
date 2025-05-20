@@ -57,6 +57,13 @@ public class GamePanel extends JPanel  implements KeyListener {
     private Music music = new Music();
     private boolean trapSoundPlayed = false;
 
+    // affichage du temps restant pour le laser :
+    private int pickupTimer = 0;
+    private final int pickupDisplayDuration = 5 * 60; // 5 secondes
+    private boolean pickedUpLaser = false;
+
+
+
     // Méthode pour alterner la vue (de face à côté et vice-versa)
     public void switchView() {
         if (inTransition) return; // Si une transition est déjà en cours, on ne peut pas en démarrer une nouvelle
@@ -226,6 +233,12 @@ public class GamePanel extends JPanel  implements KeyListener {
                 if (canShoot && System.currentTimeMillis() - shootStartTime > SHOOT_DURATION) {
                     canShoot = false;
                 }
+                if (pickedUpLaser) {
+                    pickupTimer--;
+                    if (pickupTimer <= 0) {
+                        pickedUpLaser = false;
+                    }
+                }
 
                 laserManager.update();
                 repaint();
@@ -318,6 +331,15 @@ public class GamePanel extends JPanel  implements KeyListener {
         }
         Graphics2D g2 = (Graphics2D) g;
         laserManager.draw(g2);
+
+        if (pickedUpLaser) {
+            int secondsLeft = (int)Math.ceil(pickupTimer / 60.0);
+
+            g2.setColor(Color.WHITE);
+            g2.setFont(new Font("Arial", Font.BOLD, 20));
+            g2.drawString("Item unspawn in: " + secondsLeft,275 , 40);
+        }
+
     }
 
     // Méthode pour faire apparaître des météorites si nécessaire
@@ -370,12 +392,16 @@ public class GamePanel extends JPanel  implements KeyListener {
             }
             if (currentItem != null && currentItem.isActive()) { // entre les items et le vaisseau
                 if (spaceShip.getPolygon().intersects(currentItem.getBounds())) {
+                    music.playOnce("src/resources/sounds/pick-up.wav");
                     currentItem.deactivate();
                     if (currentItem.getType().equals("heart")){
                         windowGame.addlife();
                     } else if (currentItem.getType().equals("laser")) {
                         canShoot = true;
                         shootStartTime = System.currentTimeMillis();
+                        // Démarrage du compteur d'affichage "Item unspawn in"
+                        pickupTimer = pickupDisplayDuration;
+                        pickedUpLaser = true;
                     }
 
                 }

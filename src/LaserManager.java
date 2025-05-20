@@ -37,9 +37,5 @@ public class LaserManager {
     public ArrayList<MiniLaser> getLasers() {
         return lasers;
     }
-    public void updateLaserDirection(boolean sideView) {
-        for (MiniLaser l : lasers) {
-            l.setSideView(sideView);
-        }
-    }
+
 }
