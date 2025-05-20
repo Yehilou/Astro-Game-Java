@@ -337,7 +337,7 @@ public class GamePanel extends JPanel  implements KeyListener {
 
             g2.setColor(Color.WHITE);
             g2.setFont(new Font("Arial", Font.BOLD, 20));
-            g2.drawString("Item unspawn in: " + secondsLeft,275 , 40);
+            g2.drawString("Item unspawn in: " + secondsLeft,275 , 80);
         }
 
     }
